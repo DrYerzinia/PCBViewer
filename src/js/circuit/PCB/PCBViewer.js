@@ -63,7 +63,7 @@ define(
 
 			if(attach){
 
-				this.ctx = PCBV._getWebGL(canvas);
+				this.ctx = false;//PCBV._getWebGL(canvas);
 				if(this.ctx == false){
 
 					this.mode = "Normal";
@@ -120,12 +120,6 @@ define(
 
 				}
 
-				this.buffer_layer = document.createElement('canvas');
-				this.buffer_layer.width = this.canvas.width;
-				this.buffer_layer.height = this.canvas.height;
-		
-				this.buffer_ctx = this.buffer_layer.getContext('2d');
-		
 				this.last_time = 0;
 				this.end_time = 0;
 		
@@ -653,11 +647,11 @@ define(
 				// Scale and shift
 				this.buffer_ctx.scale(scalef, scalef);
 				this.buffer_ctx.translate(-this.offset.x, -this.offset.y);	
-			
+
 				// Fill board space Grey
 				this.buffer_ctx.fillStyle = '#E5E5E5';
 				this.buffer_ctx.fillRect(0, 0, this.width, this.height);
-			
+
 				this.ctx.globalAlpha = 1.0;
 			
 				this.ctx.drawImage(this.buffer_layer, 0, 0);
