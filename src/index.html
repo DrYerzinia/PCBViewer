@@ -2,15 +2,16 @@
 <html>
 	<head>
 		<title>PCBViewer</title>
+		<link rel="stylesheet" type="text/css" href="css/styles.css">
 		<script data-main="js/main.js" src="js/require.js"></script>
 	</head>
 	<body>
-		<center>
-			PCB URL:
-			<input id="pcburl" type="text" name="url" value="/Project_Files/MRF24Outlet.pcb">
+		<div style="text-align:center;">
+			PCB:
+			<select id="samplePCBs"></select>
 			<button id="load">Load</button>
 			<br>
 			<canvas id="pcbcan" width="800" height="600" tabindex="1"></canvas>
-		</center>
+		</div>
 	</body>
 </html>
