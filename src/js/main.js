@@ -6,12 +6,13 @@ requirejs.config({
 
 require(['circuit/PCB/PCBViewer'], function(PCBV){
 
-	var PCBListSelect, PCBListReq, PCBCanvasContainer;
+	var PCBListSelect, PCBListReq, PCBCanvasContainer, status;
 
 	window.PCBViewer = {};
 
 	PCBListSelect = document.getElementById("samplePCBs");
 	PCBCanvasContainer = document.getElementById("PCB-canvas-container");
+	status = document.getElementById("Status");
 
 	window.onresize = function(e){
 
@@ -77,6 +78,8 @@ require(['circuit/PCB/PCBViewer'], function(PCBV){
 			window.PCBViewer.pcb = new PCBV(window.PCBViewer.canvas, true, mode);
 			window.PCBViewer.pcb.parse_data(PCBLoadReq.response);
 			window.PCBViewer.pcb.render();
+
+			status.innerHTML = window.PCBViewer.pcb.mode;
 
 		};
 
