@@ -4,9 +4,13 @@ requirejs.config({
 
 });
 
-require(['circuit/PCBViewer'], function(PCBV){
+require(['circuit/PCB/PCBViewer'], function(PCBV){
+
+	var PCBListSelect, PCBListReq;
 
 	window.PCBViewer = {};
+
+	PCBListSelect = document.getElementById("samplePCBs");
 
 	window.PCBViewer.canvas = document.getElementById('pcbcan');
 
@@ -23,21 +27,44 @@ require(['circuit/PCBViewer'], function(PCBV){
 
 	};
 
+	// Create Sample Schematic List
+	PCBListReq = new XMLHttpRequest();
+	PCBListReq.open('GET', "data/pcb/PCBList.json");
+	PCBListReq.responseTyle = 'text';
+	PCBListReq.onload = function() {
+
+		var PCBList, i, el, opt;
+
+		PCBList = JSON.parse(PCBListReq.response);
+
+		for (i = 0; i < PCBList.length; i++) {
+
+			var opt = PCBList[i];
+			var el = document.createElement("option");
+			el.textContent = opt;
+			el.value = opt;
+			PCBListSelect.appendChild(el);
+
+		}
+
+	};
+	PCBListReq.send();
+
 	document.getElementById('load').onclick = function(){
 
-		new_sym_req = new XMLHttpRequest();
-		new_sym_req.open('GET', document.getElementById('pcburl').value);
-		new_sym_req.responseType = 'text';
+		var PCBLoadReq = new XMLHttpRequest();
+		PCBLoadReq.open('GET', "data/pcb/" + PCBListSelect.value);
+		PCBLoadReq.responseType = 'text';
 
-		new_sym_req.onload = function(){
+		PCBLoadReq.onload = function(){
 
 			window.PCBViewer.pcb = new PCBV(window.PCBViewer.canvas, true);
-			window.PCBViewer.pcb.parse_data(new_sym_req.response);
+			window.PCBViewer.pcb.parse_data(PCBLoadReq.response);
 			window.PCBViewer.pcb.render();
 
 		};
 
-		new_sym_req.send();
+		PCBLoadReq.send();
 
 	};
 
