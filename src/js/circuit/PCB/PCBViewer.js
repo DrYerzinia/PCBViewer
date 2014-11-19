@@ -140,7 +140,7 @@ define(
 				canvas.onmousedown = function(t){return function(e){if(e.which == 1) t.clicking = true;};}(this);
 				canvas.onkeydown = function(t){return function(e){t.update_key(e);};}(this);
 							
-				canvas.onmousemove = function(t){return function(e){	
+				canvas.onmousemove = function(t){return function(e){
 					if(t.clicking)
 						t.update_mouse_drag(t.mouse_x-e.pageX, t.mouse_y-e.pageY);		
 					t.mouse_x = e.pageX;
@@ -458,8 +458,6 @@ define(
 			var which = e.which, prevent = true;
 	
 			var shift = 10;
-			if(this.mode == "Accelerated")
-				shift = 10000;
 
 			switch(which){
 				case 38: // Down
@@ -480,17 +478,13 @@ define(
 					this.side = !this.side;
 					break;
 				case 90: // Z : Zoom in
-					if(this.mode == "Normal"){
-						this.offset.y += ((this.canvas.height-(this.canvas.height/1.1))/2)/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
-						this.offset.x += ((this.canvas.width-(this.canvas.width/1.1))/2)/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
-					}
+					this.offset.y += ((this.canvas.height-(this.canvas.height/1.1))/2)/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
+					this.offset.x += ((this.canvas.width-(this.canvas.width/1.1))/2)/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
 					this.scale *= 1.1;
 					break;
 				case 88: // X : Zoom out
-					if(this.mode == "Normal"){
-						this.offset.y += ((this.canvas.height-(this.canvas.height*1.1))/2)/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
-						this.offset.x += ((this.canvas.width-(this.canvas.width*1.1))/2)/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
-					}
+					this.offset.y += ((this.canvas.height-(this.canvas.height*1.1))/2)/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
+					this.offset.x += ((this.canvas.width-(this.canvas.width*1.1))/2)/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
 					this.scale /= 1.1;
 					break;
 				default:
@@ -512,19 +506,10 @@ define(
 
 			var dx, dy, min;
 
-			if(this.mode == "Accelerated"){
-
-				dy = y;
-				dx = x;
-
-			} else {
-
 				min = Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale;
 
 				dy = y / min;
 	            dx = x / min;
-
-			}
 
 			if(this.side) this.offset.y -= dy;
 			else this.offset.y += dy;
@@ -538,18 +523,14 @@ define(
 		PCBV.prototype.update_mouse_scroll = function(x, y, s){
 
 			if(s > 0){ // Zoom in
-				if(this.mode == "Normal"){
-					if(this.side) this.offset.y += (((this.canvas.height-(this.canvas.height/1.1))/2)*((this.canvas.height-y)/this.canvas.height*2))/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
-					else this.offset.y += (((this.canvas.height-(this.canvas.height/1.1))/2)*(2-((this.canvas.height-y)/this.canvas.height*2)))/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
-					this.offset.x += (((this.canvas.width-(this.canvas.width/1.1))/2)*(2-((this.canvas.width-x)/this.canvas.width*2)))/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
-				}
+				if(this.side) this.offset.y += (((this.canvas.height-(this.canvas.height/1.1))/2)*((this.canvas.height-y)/this.canvas.height*2))/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
+				else this.offset.y += (((this.canvas.height-(this.canvas.height/1.1))/2)*(2-((this.canvas.height-y)/this.canvas.height*2)))/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
+				this.offset.x += (((this.canvas.width-(this.canvas.width/1.1))/2)*(2-((this.canvas.width-x)/this.canvas.width*2)))/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
 				this.scale *= 1.1;
 			} else { // Zoom out
-				if(this.mode == "Normal"){
-					if(this.side) this.offset.y += (((this.canvas.height-(this.canvas.height*1.1))/2)*((this.canvas.height-y)/this.canvas.height*2))/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
-					else this.offset.y += (((this.canvas.height-(this.canvas.height*1.1))/2)*(2-((this.canvas.height-y)/this.canvas.height*2)))/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
-					this.offset.x += (((this.canvas.width-(this.canvas.width*1.1))/2)*(2-((this.canvas.width-x)/this.canvas.width*2)))/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
-				}
+				if(this.side) this.offset.y += (((this.canvas.height-(this.canvas.height*1.1))/2)*((this.canvas.height-y)/this.canvas.height*2))/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
+				else this.offset.y += (((this.canvas.height-(this.canvas.height*1.1))/2)*(2-((this.canvas.height-y)/this.canvas.height*2)))/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
+				this.offset.x += (((this.canvas.width-(this.canvas.width*1.1))/2)*(2-((this.canvas.width-x)/this.canvas.width*2)))/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
 				this.scale /= 1.1;
 			}
 			this.render();
@@ -588,7 +569,7 @@ define(
 		};
 
 		PCBV.prototype._do_render = function(){
-var cur_time = (new Date()).getTime();
+
 			// Calculate how much we need to scale based on size of the
 			// pcb vs canvas size and how zoomed in we are
 			scalef = Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale;
@@ -647,7 +628,7 @@ var cur_time = (new Date()).getTime();
 			}
 
 			this.end_time = (new Date()).getTime();
-console.log((new Date()).getTime() - cur_time);
+
 		}
 
 		PCBV.prototype.render = function(force, timeout){

@@ -111,8 +111,8 @@ define(
 				glMatrix.mat4.scale(mvMatrix, [1.0, -1.0, 1.0]);
 			}
 
-			glMatrix.mat4.translate(mvMatrix, [-offsetX, -offsetY, 0.0]);
 			glMatrix.mat4.scale(mvMatrix, [scaleFactor, scaleFactor, 1.0]);
+			glMatrix.mat4.translate(mvMatrix, [-offsetX, -offsetY, 0.0]);
 
 	        gl.disableVertexAttribArray(textureShaderProgram.textureCoordAttribute);
 	        gl.disable(gl.BLEND);
