@@ -255,11 +255,11 @@ define(
 
 		}
 
-		LayerManager.prototype.setupFramebuffers = function(gl, width, height){
+		LayerManager.prototype.setupFramebuffers = function(gl){
 
 			var l;
 			for(l in this.layers)
-				this.layers[l].setupFramebuffer(gl, width, height);
+				this.layers[l].setupFramebuffer(gl);
 
 		}
 

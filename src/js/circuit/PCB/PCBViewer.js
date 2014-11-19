@@ -47,7 +47,7 @@ define(
 		VertexShaderTextxt
 	){
 
-		function PCBV(canvas, attach) {
+		function PCBV(canvas, attach, mode) {
 
 			var gl;
 
@@ -63,11 +63,21 @@ define(
 
 			if(attach){
 
-				this.ctx = false;//PCBV._getWebGL(canvas);
+				if(mode == "Normal")
+					this.ctx = false;
+				else
+					this.ctx = PCBV._getWebGL(canvas);
+
 				if(this.ctx == false){
 
 					this.mode = "Normal";
 					this.ctx = canvas.getContext('2d');
+
+					this.buffer_layer = document.createElement('canvas');
+					this.buffer_layer.width = this.canvas.width;
+					this.buffer_layer.height = this.canvas.height;
+			
+					this.buffer_ctx = this.buffer_layer.getContext('2d');
 
 				} else {
 
@@ -152,6 +162,8 @@ define(
 				canvas.onmousemove = this.mouseMoveFunction;
 
 			};
+
+			console.log("Mode: " + this.mode);
 		
 		};
 
@@ -190,6 +202,10 @@ define(
 
 				// Clear errors
 				while(gl.getError());
+
+			} else {
+
+				this.ctx = null;
 
 			}
 
@@ -238,10 +254,21 @@ define(
 		}
 
 		PCBV.prototype.resize = function(){
-		
-			this.buffer_layer.width = this.canvas.width;
-			this.buffer_layer.height = this.canvas.height;
-		
+
+			if(this.mode == "Normal"){
+
+				this.buffer_layer.width = this.canvas.width;
+				this.buffer_layer.height = this.canvas.height;
+
+			} else {
+
+				this.ctx.viewportWidth = this.canvas.width;
+				this.ctx.viewportHeight = this.canvas.height;
+
+				this.resized = true;
+
+			}
+
 		};
 	
 		PCBV.prototype.parse_data = function(data){
@@ -472,7 +499,7 @@ define(
 				this.layerManager.layers.push(this.layerManager.solder);
 				this.layerManager.layers.push(this.layerManager.pins);
 
-				this.layerManager.setupFramebuffers(this.ctx, this.canvas.width, this.canvas.height);
+				this.layerManager.setupFramebuffers(this.ctx);
 				this.layerManager.init3DArrays(this.ctx);
 				this.layerManager.setupGL(this.ctx, this.width, this.height);
 
@@ -626,6 +653,13 @@ define(
 			scalef = Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale;
 
 			if(this.mode == "Accelerated"){
+
+				if(this.resized){
+					for(var i = 0; i < this.layers.length; i++){
+						this.layers[i].resizeFrameBuffer(this.ctx);
+					}
+					this.resized = false;
+				}
 
 				this.layerManager.renderGL(this.ctx, this.shaderProgram, this.texShaderProgram, this.side, this.offset.x, this.offset.y, scalef);
 

@@ -6,24 +6,24 @@ requirejs.config({
 
 require(['circuit/PCB/PCBViewer'], function(PCBV){
 
-	var PCBListSelect, PCBListReq;
+	var PCBListSelect, PCBListReq, PCBCanvasContainer;
 
 	window.PCBViewer = {};
 
 	PCBListSelect = document.getElementById("samplePCBs");
-
-	window.PCBViewer.canvas = document.getElementById('pcbcan');
-
-	window.PCBViewer.canvas.width = window.innerWidth-20;
-	window.PCBViewer.canvas.height = window.innerHeight-50;
+	PCBCanvasContainer = document.getElementById("PCB-canvas-container");
 
 	window.onresize = function(e){
 
-		window.PCBViewer.canvas.width = window.innerWidth-20;
-		window.PCBViewer.canvas.height = window.innerHeight-50;
+		if(window.PCBViewer.canvas){
 
-		window.PCBViewer.pcb.resize();
-		window.PCBViewer.pcb.render(true);
+			window.PCBViewer.canvas.width = window.innerWidth-20;
+			window.PCBViewer.canvas.height = window.innerHeight-50;
+
+			window.PCBViewer.pcb.resize();
+			window.PCBViewer.pcb.render(true);
+
+		}
 
 	};
 
@@ -58,10 +58,23 @@ require(['circuit/PCB/PCBViewer'], function(PCBV){
 
 		PCBLoadReq.onload = function(){
 
-			if(window.PCBViewer.pcb)
-				window.PCBViewer.pcb.destroy();
+			if(window.PCBViewer.pcb){
 
-			window.PCBViewer.pcb = new PCBV(window.PCBViewer.canvas, true);
+				window.PCBViewer.pcb.destroy();
+				window.PCBViewer.pcb = null;
+
+			}
+
+			var mode = document.querySelector('input[name="mode"]:checked').value;
+
+			PCBCanvasContainer.innerHTML = '<canvas id="pcbcan" width="800" height="600" tabindex="1"></canvas>';
+
+			window.PCBViewer.canvas = document.getElementById('pcbcan');
+
+			window.PCBViewer.canvas.width = window.innerWidth-20;
+			window.PCBViewer.canvas.height = window.innerHeight-50;
+
+			window.PCBViewer.pcb = new PCBV(window.PCBViewer.canvas, true, mode);
 			window.PCBViewer.pcb.parse_data(PCBLoadReq.response);
 			window.PCBViewer.pcb.render();
 

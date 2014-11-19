@@ -68,12 +68,24 @@ define(function(){
 
 	}
 
-	Layer.prototype.setupFramebuffer = function(gl, width, height){
+	Layer.prototype.resizeFrameBuffer = function(gl){
+
+        this.framebuffer.width = gl.viewportWidth;
+        this.framebuffer.height = gl.viewportHeight;
+
+        gl.bindTexture(gl.TEXTURE_2D, this.texture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.framebuffer.width, this.framebuffer.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+        gl.bindRenderbuffer(gl.RENDERBUFFER, this.renderbuffer);
+        gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, this.framebuffer.width, this.framebuffer.height);
+
+	}
+
+	Layer.prototype.setupFramebuffer = function(gl){
 
         this.framebuffer = gl.createFramebuffer();
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
-        this.framebuffer.width = width;
-        this.framebuffer.height = height;
+        this.framebuffer.width = gl.viewportWidth;
+        this.framebuffer.height = gl.viewportHeight;
 
         this.texture = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, this.texture);
