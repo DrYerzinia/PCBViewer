@@ -178,10 +178,24 @@ define(
 				for(i in this.symbols)
 					this.symbols[i].cleanupGL(gl);
 
+				// Restore GL Defaults
+				gl.disable(gl.BLEND);
+				gl.useProgram(null);
+				gl.blendFunc(gl.ONE, gl.ZERO);
+				gl.clearColor(0, 0, 0, 0);
+
+				// Unbind all buffers
 				gl.bindTexture(gl.TEXTURE_2D, null);
 				gl.bindBuffer(gl.ARRAY_BUFFER, null);
 				gl.bindRenderbuffer(gl.RENDERBUFFER, null);
 				gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+				// Clear viewport
+				gl.viewport(0, 0, gl.viewportWidth, gl.viewportheight);
+				gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+				// Clear errors
+				while(gl.getError());
 
 			}
 
