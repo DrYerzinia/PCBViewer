@@ -33,7 +33,7 @@ define(function() {
 
 	Pad.prototype.renderGL = function(gl, shaderProgram){
 
-		gl.uniform4f(shaderProgram.vColorUniform, 0.21, 0.21, 0.21, 1.0);
+		gl.uniform4f(shaderProgram.vColorUniform, 0.35, 0.35, 0.35, 1.0);
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
 		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, this.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vertexBuffer.numItems);

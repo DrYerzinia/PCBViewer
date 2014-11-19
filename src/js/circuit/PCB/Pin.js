@@ -61,12 +61,12 @@ define(function() {
 
 		gl.uniform1f(shaderProgram.innerRadiusUniform, 0.0);
 
-		gl.uniform4f(shaderProgram.vColorUniform, 0.48, 0.48, 0.48, 1.0);
+		gl.uniform4f(shaderProgram.vColorUniform, 0.35, 0.35, 0.35, 1.0);
 		gl.uniform1f(shaderProgram.pointsizeUniform, this.thick*gl.scaleFactor);
 		gl.drawArrays(gl.POINTS, 0, this.pointBuffer.numItems);
 
 		gl.uniform1f(shaderProgram.roundPointsUniform, true);
-		gl.uniform4f(shaderProgram.vColorUniform, 0.64, 0.64, 0.64, 1.0);
+		gl.uniform4f(shaderProgram.vColorUniform, 0.74, 0.74, 0.74, 1.0);
 		gl.uniform1f(shaderProgram.pointsizeUniform, this.drill * gl.scaleFactor);
 		gl.drawArrays(gl.POINTS, 0, this.pointBuffer.numItems);
 
