@@ -53,7 +53,7 @@ define(function() {
 
 	Pad.prototype.setup3DArrayBuffer = function(gl, x, y){
 
-		var vBuffer, x1, x2, y1, y2;
+		var vBuffer, vertices, x1, x2, y1, y2;
 
 		vBuffer = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);

@@ -50,6 +50,11 @@ define(function(){
 
 	Layer.prototype.cleanupGL = function(gl){
 
+		// render polygons first
+		// if there are any clearpoly polygons
+		// render alpha of pins, same layer pads, and other clearing objects
+		// render rest like normal
+
 		var i;
 		for(i = 0; i < this.parts.length; i++)
 			this.parts[i].cleanupGL(gl);
