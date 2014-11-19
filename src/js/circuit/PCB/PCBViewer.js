@@ -18,6 +18,7 @@ define(
 	 	"./Element",
 	 	"./ElementLine",
 	 	"./ElementArc",
+	 	"./Polygon",
 	 	"./Symbol",
 	 	"./LayerManager",
 	 	"Graphics/glMatrix",
@@ -37,6 +38,7 @@ define(
 		Element,
 		ElementLine,
 		ElementArc,
+		Polygon,
 		Symbol,
 		LayerManager,
 		glMatrix,
@@ -387,8 +389,38 @@ define(
 	
 							new_obj.parts.push(sub_obj);
 	
-						};
-	
+						} else if(line.substr(0, 7) == "Polygon"){
+
+							var flags = line.substr(9,line.length-11), points = [];
+
+							line = '';
+							while(line.indexOf(')') == -1){
+
+								l++;
+								line = lines[l];
+
+								var bracket_idx = line.indexOf('[');
+								while(bracket_idx != -1){
+
+									var space_idx = line.indexOf(' ', bracket_idx);
+
+									var newPoint = {
+										x: parseFloat(line.substring(bracket_idx + 1, space_idx)),
+										y: parseFloat(line.substring(space_idx + 1, line.indexOf(']', space_idx))),
+									};
+									points.push(newPoint);
+									bracket_idx++;
+									bracket_idx = line.indexOf('[', bracket_idx);
+
+								}
+
+							}
+
+							sub_obj = new Polygon(flags, points);
+							new_obj.parts.push(sub_obj);
+
+						}
+
 					}
 	
 					this.layers.push(new_obj);
@@ -432,11 +464,7 @@ define(
 	
 					this.symbols[new_obj.name] = new_obj;
 	
-				} else if(line.substr(0, 7) == "Polygon"){
-	
-					//
-	
-				}
+				} else {}
 	
 				l++;
 	
