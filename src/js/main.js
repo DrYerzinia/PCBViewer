@@ -58,6 +58,9 @@ require(['circuit/PCB/PCBViewer'], function(PCBV){
 
 		PCBLoadReq.onload = function(){
 
+			if(window.PCBViewer.pcb)
+				window.PCBViewer.pcb.destroy();
+
 			window.PCBViewer.pcb = new PCBV(window.PCBViewer.canvas, true);
 			window.PCBViewer.pcb.parse_data(PCBLoadReq.response);
 			window.PCBViewer.pcb.render();

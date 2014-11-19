@@ -149,9 +149,17 @@ define(
 			//var i;
 			//for(i = 0; i < this.parts.length; i++)
 				//this.parts[i].renderGL(gl, shaderProgram);
-	
+
 		}
-	
+
+		Element.prototype.cleanupGL = function(gl){
+
+			var i;
+			for(i = 0; i < this.parts.length; i++)
+				this.parts[i].cleanupGL(gl);
+
+		}
+
 		Element.prototype.setup3DArrayBuffer = function(gl, x, y){
 	
 			//var i;

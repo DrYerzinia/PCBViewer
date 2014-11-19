@@ -107,8 +107,8 @@ define(
 			glMatrix.mat4.identity(mvMatrix);
 
 			if(side == Layer.TOP){
-				glMatrix.mat4.translate(mvMatrix, [0.0, this.height * scaleFactor, 0.0]);
 				glMatrix.mat4.scale(mvMatrix, [1.0, -1.0, 1.0]);
+				glMatrix.mat4.translate(mvMatrix, [0.0, -gl.viewportHeight, 0.0]);
 			}
 
 			glMatrix.mat4.scale(mvMatrix, [scaleFactor, scaleFactor, 1.0]);

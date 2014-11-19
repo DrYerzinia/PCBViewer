@@ -45,6 +45,17 @@ define(function() {
 
 	}
 
+	Via.prototype.cleanupGL = function(gl){
+
+		if(this.pointBuffer){
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.pointBuffer);
+			gl.bufferData(gl.ARRAY_BUFFER, 1, gl.STATIC_DRAW);
+			gl.deleteBuffer(this.pointBuffer);
+			this.pointBuffer = null;
+		}
+
+	}
+
 	Via.prototype.setup3DArrayBuffer = function(gl){
 
 		var vBuffer;

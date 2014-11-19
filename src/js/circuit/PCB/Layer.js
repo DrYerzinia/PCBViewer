@@ -48,6 +48,18 @@ define(function(){
 
 	}
 
+	Layer.prototype.cleanupGL = function(gl){
+
+		var i;
+		for(i = 0; i < this.parts.length; i++)
+			this.parts[i].cleanupGL(gl);
+
+		gl.deleteTexture(this.texture);
+		gl.deleteRenderbuffer(this.renderbuffer);
+		gl.deleteFramebuffer(this.framebuffer);
+
+	}
+
 	Layer.prototype.init3DArrays = function(gl){
 
 		var i;

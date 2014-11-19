@@ -40,6 +40,17 @@ define(function() {
 
 	}
 
+	Pad.prototype.cleanupGL = function(gl){
+
+		if(this.vertexBuffer){
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+			gl.bufferData(gl.ARRAY_BUFFER, 1, gl.STATIC_DRAW);
+			gl.deleteBuffer(this.vertexBuffer);
+			this.vertexBuffer = null;
+		}
+
+	}
+
 	Pad.prototype.setup3DArrayBuffer = function(gl, x, y){
 
 		var vBuffer, x1, x2, y1, y2;

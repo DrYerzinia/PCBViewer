@@ -62,7 +62,7 @@ define(function() {
 		gl.uniform1f(shaderProgram.innerRadiusUniform, 0.0);
 
 		gl.uniform4f(shaderProgram.vColorUniform, 0.35, 0.35, 0.35, 1.0);
-		gl.uniform1f(shaderProgram.pointsizeUniform, this.thick*gl.scaleFactor);
+		gl.uniform1f(shaderProgram.pointsizeUniform, this.thick * gl.scaleFactor);
 		gl.drawArrays(gl.POINTS, 0, this.pointBuffer.numItems);
 
 		gl.uniform1f(shaderProgram.roundPointsUniform, true);
@@ -71,6 +71,17 @@ define(function() {
 		gl.drawArrays(gl.POINTS, 0, this.pointBuffer.numItems);
 
 		gl.uniform1f(shaderProgram.roundPointsUniform, false);
+
+	}
+
+	Pin.prototype.cleanupGL = function(gl){
+
+		if(this.pointBuffer){
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.pointBuffer);
+			gl.bufferData(gl.ARRAY_BUFFER, 1, gl.STATIC_DRAW);
+			gl.deleteBuffer(this.pointBuffer);
+			this.pointBuffer = null;
+		}
 
 	}
 

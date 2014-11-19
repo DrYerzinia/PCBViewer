@@ -134,27 +134,70 @@ define(
 				this.mouse_x = canvas.width/2;
 				this.mouse_y = canvas.height/2;
 		
-				if(window.addEventListener){
-					document.addEventListener("mouseup", function(t){return function(e){if(e.which == 1) t.clicking = false;};}(this), false);
-				} else document.attachEvent("mouseup", function(t){return function(e){if(e.which == 1) t.clicking = false;};}(this));
-				canvas.onmousedown = function(t){return function(e){if(e.which == 1) t.clicking = true;};}(this);
-				canvas.onkeydown = function(t){return function(e){t.update_key(e);};}(this);
-							
-				canvas.onmousemove = function(t){return function(e){
+				this.mouseUpFunction = function(t){return function(e){if(e.which == 1) t.clicking = false;};}(this);
+				this.mouseDownFunction = function(t){return function(e){if(e.which == 1) t.clicking = true;};}(this)
+				this.keyDownFunction = function(t){return function(e){t.update_key(e);};}(this);
+				this.mouseMoveFunction = function(t){return function(e){
 					if(t.clicking)
 						t.update_mouse_drag(t.mouse_x-e.pageX, t.mouse_y-e.pageY);		
 					t.mouse_x = e.pageX;
 					t.mouse_y = e.pageY;
 				};}(this);
-			
+				this.mouseWheelFunction = function(t){return function(e){t.wheel(e);};}(this);
+
 				if(window.addEventListener){
-					this.canvas.addEventListener("mousewheel", function(t){return function(e){t.wheel(e);};}(this), false);
-				        this.canvas.addEventListener('DOMMouseScroll', function(t){return function(e){t.wheel(e);};}(this), false);
-				} else this.canvas.attachEvent("onmousewheel", function(t){return function(e){t.wheel(e);};}(this));
-		
+					document.addEventListener("mouseup", this.mouseUpFunction, false);
+					this.canvas.addEventListener("mousewheel", this.mouseWheelFunction, false);
+					this.canvas.addEventListener('DOMMouseScroll', this.mouseWheelFunction, false);
+				} else {
+					document.attachEvent("mouseup", this.mouseUpFunction);
+					this.canvas.attachEvent("onmousewheel", this.mouseWheelFunction);
+				}
+				canvas.onmousedown = this.mouseDownFunction;
+				canvas.onkeydown = this.keyDownFunction;
+				canvas.onmousemove = this.mouseMoveFunction;
+
 			};
 		
 		};
+
+		PCBV.prototype.destroy = function(){
+
+			var i;
+
+			if(this.mode == "Accelerated"){
+
+				var gl = this.ctx;
+
+				for(i = 0; i < this.vias.length; i++)
+					this.vias[i].cleanupGL(gl);
+				for(i = 0; i < this.layers.length; i++)
+					this.layers[i].cleanupGL(gl);
+				for(i = 0; i < this.elements.length; i++)
+					this.elements[i].cleanupGL(gl);
+				for(i in this.symbols)
+					this.symbols[i].cleanupGL(gl);
+
+				gl.bindTexture(gl.TEXTURE_2D, null);
+				gl.bindBuffer(gl.ARRAY_BUFFER, null);
+				gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+				gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+			}
+
+			if(window.addEventListener){
+				document.removeEventListener("mouseup", this.mouseUpFunction, false);
+				this.canvas.removeEventListener("mousewheel", this.mouseWheelFunction, false);
+				this.canvas.removeEventListener('DOMMouseScroll', this.mouseWheelFunction, false);
+			} else {
+				document.detachEvent("mouseup", this.mouseUpFunction);
+				this.canvas.detachEvent("onmousewheel", this.mouseWheelFunction);
+			}
+			this.canvas.onmousedown = null;
+			this.canvas.onkeydown = null;
+			this.canvas.onmousemove = null;
+
+		}
 
 		// TODO: maybe make this layer named based!
 		PCBV._defaultLayerColors = ['#8B2323', '#3A5FCD', '#104E8B', '#CD3700',

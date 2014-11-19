@@ -43,7 +43,25 @@ define(function() {
 		gl.drawArrays(gl.POINTS, 0, this.pointBuffer.numItems);
 		gl.uniform1f(shaderProgram.roundPointsUniform, false);
 
-	}
+	};
+
+	ElementLine.prototype.cleanupGL = function(gl){
+
+		if(this.vertexBuffer){
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+			gl.bufferData(gl.ARRAY_BUFFER, 1, gl.STATIC_DRAW);
+			gl.deleteBuffer(this.vertexBuffer);
+			this.vertexBuffer = null;
+		}
+
+		if(this.pointBuffer){
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.pointBuffer);
+			gl.bufferData(gl.ARRAY_BUFFER, 1, gl.STATIC_DRAW);
+			gl.deleteBuffer(this.pointBuffer);
+			this.pointBuffer = null;
+		}
+
+	};
 
 	ElementLine.prototype.setup3DArrayBuffer = function(gl, x, y){
 

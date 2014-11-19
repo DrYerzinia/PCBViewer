@@ -22,6 +22,13 @@ define(function() {
 
 	};
 
+	Symbol.prototype.cleanupGL = function(gl){
+
+		for(var l = 0; l < this.lines.length; l++)
+			this.lines[l].cleanupGL(gl);
+
+	}
+
 	Symbol.prototype.init3DArrays = function(gl){
 
 		for(var l = 0; l < this.lines.length; l++)

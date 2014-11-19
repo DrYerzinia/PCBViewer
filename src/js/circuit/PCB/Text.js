@@ -82,6 +82,8 @@ define(
 
 		}
 	
+		Text.prototype.cleanupGL = function(gl){}
+
 		Text.prototype.setup3DArrayBuffer = function(gl, x, y){
 			//
 		}
