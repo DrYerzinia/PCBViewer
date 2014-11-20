@@ -11,34 +11,48 @@ define(function() {
 		this.drill = drill;
 		this.name = name;
 		this.num = num;
-		this.flags = flags;
+		this.flags = {
+			square: false
+		};
+
+		var i, split = flags.split(',');
+		for(i = 0; i < split.length; i++)
+			this.flags[split[i]] = true;
 
 	};
 
 	Pin.prototype.render = function(ctx, color) {
 
-		if (color == '#FFFFFF')
+		if(!this._cache){
+
+			this._cache = {};
+
+			this._cache.x = this.x;
+			this._cache.y = this.y;
+			if(this.parent){
+				this._cache.x += this.parent.mx;
+				this._cache.y += this.parent.my;
+			}
+			this._cache.rx = this._cache.x - (this.thick / 2);
+			this._cache.ry = this._cache.y - (this.thick / 2);
+
+		}
+
+		if(color == '#FFFFFF')
 			return;
 
-		var i, splt = this.flags.split(','), square = false;
-
-		for (i = 0; i < splt.length; i++)
-			if (splt[i] == 'square')
-				square = true;
-
 		ctx.beginPath();
-		if (square)
-			ctx.rect(this.x - this.thick / 2, this.y - this.thick / 2,
-					this.thick, this.thick);
+		if(this.flags.square)
+			ctx.rect(this._cache.rx, this._cache.ry, this.thick, this.thick);
 		else
-			ctx.arc(this.x, this.y, this.thick / 2, 0, Math.PI * 2, true);
+			ctx.arc(this._cache.x, this._cache.y, this.thick / 2, 0, Math.PI * 2, true);
 
 		ctx.closePath();
 		ctx.fillStyle = '#4D4D4D'; // TODO: global color
 		ctx.fill();
 
 		ctx.beginPath();
-		ctx.arc(this.x, this.y, this.drill / 2, 0, Math.PI * 2, true);
+		ctx.arc(this._cache.x, this._cache.y, this.drill / 2, 0, Math.PI * 2, true);
 		ctx.closePath();
 		ctx.fillStyle = '#E5E5E5'; // TODO: set colors to global option
 		ctx.fill();
@@ -46,15 +60,8 @@ define(function() {
 	};
 
 	Pin.prototype.renderGL = function(gl, shaderProgram){
-
-		var splt = this.flags.split(','), square = true;
-
-		for (i = 0; i < splt.length; i++)
-			if (splt[i] == 'square')
-				square = false;
-
 		
-		gl.uniform1f(shaderProgram.roundPointsUniform, square);
+		gl.uniform1f(shaderProgram.roundPointsUniform, !this.flags.square);
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.pointBuffer);
 		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, this.pointBuffer.itemSize, gl.FLOAT, false, 0, 0);
@@ -76,14 +83,7 @@ define(function() {
 
 	Pin.prototype.clearGL = function(gl, shaderProgram){
 
-		var splt = this.flags.split(','), square = true;
-
-		for (i = 0; i < splt.length; i++)
-			if (splt[i] == 'square')
-				square = false;
-
-		
-		gl.uniform1f(shaderProgram.roundPointsUniform, square);
+		gl.uniform1f(shaderProgram.roundPointsUniform, !this.flags.square);
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.pointBuffer);
 		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, this.pointBuffer.itemSize, gl.FLOAT, false, 0, 0);

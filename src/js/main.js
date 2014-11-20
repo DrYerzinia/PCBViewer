@@ -1,6 +1,9 @@
 requirejs.config({
 
 	baseUrl: 'js',
+	paths: {
+		shaders: '../data/shaders',
+	}
 
 });
 
@@ -59,11 +62,11 @@ require(['circuit/PCB/PCBViewer'], function(PCBV){
 
 		PCBLoadReq.onload = function(){
 
-			if(window.PCBViewer.pcb){
+			var pcb = window.PCBViewer.pcb;
 
-				window.PCBViewer.pcb.destroy();
-				window.PCBViewer.pcb = null;
-
+			if(pcb){
+				pcb.destroy();
+				pcb = null;
 			}
 
 			var mode = document.querySelector('input[name="mode"]:checked').value;
@@ -75,9 +78,11 @@ require(['circuit/PCB/PCBViewer'], function(PCBV){
 			window.PCBViewer.canvas.width = window.innerWidth-20;
 			window.PCBViewer.canvas.height = window.innerHeight-50;
 
-			window.PCBViewer.pcb = new PCBV(window.PCBViewer.canvas, true, mode);
-			window.PCBViewer.pcb.parse_data(PCBLoadReq.response);
-			window.PCBViewer.pcb.render();
+			pcb = new PCBV(window.PCBViewer.canvas, true, mode);
+			window.PCBViewer.pcb = pcb;
+			pcb.parse(PCBLoadReq.response);
+			pcb.setup();
+			pcb.render();
 
 			status.innerHTML = window.PCBViewer.pcb.mode;
 

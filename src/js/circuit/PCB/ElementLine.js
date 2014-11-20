@@ -12,9 +12,18 @@ define(function() {
 
 	ElementLine.prototype.render = function(ctx, color) {
 
+		var x1 = this.x1, y1 = this.y1, x2 = this.x2, y2 = this.y2;
+		
+		if(this.parent){
+			x1 += this.parent.mx;
+			y1 += this.parent.my;
+			x2 += this.parent.mx;
+			y2 += this.parent.my;
+		}
+
 		ctx.beginPath();
-		ctx.moveTo(this.x1, this.y1);
-		ctx.lineTo(this.x2, this.y2);
+		ctx.moveTo(x1, y1);
+		ctx.lineTo(x2, y2);
 		ctx.lineCap = 'round';
 		ctx.lineWidth = this.thick;
 		ctx.strokeStyle = color;

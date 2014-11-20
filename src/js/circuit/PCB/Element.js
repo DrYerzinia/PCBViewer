@@ -44,26 +44,12 @@ define(
 		};
 	
 		Element.prototype.render = function(ctx, color, mirror,	pins_only) {
-	
+
 			var i, sym, rot = 0;
 	
 			ctx.save();
 	
 			ctx.translate(this.mx, this.my);
-	
-			for (i = 0; i < this.parts.length; i++) {
-				if (pins_only) {
-					if (this.parts[i] instanceof Pin)
-						this.parts[i].render(ctx, color);
-				} else {
-					this.parts[i].render(ctx, color);
-				}
-			}
-	
-			if (pins_only) {
-				ctx.restore();
-				return;
-			}
 
 			if(!this.flags.hidename){
 
@@ -100,7 +86,6 @@ define(
 			}
 	
 			ctx.restore();
-	
 		};
 
 		Element.prototype.renderText = function(gl, shaderProgram){

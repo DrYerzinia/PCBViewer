@@ -18,16 +18,38 @@ define(function() {
 
 	Pad.prototype.render = function(ctx, color) {
 
+		if(!this._cache){
+			
+			var x1, y2, x2, y2;
+
+			this._cache = {};
+
+			x1 = this.x1;
+			y1 = this.y1;
+			x2 = this.x2;
+			y2 = this.y2;
+			if(this.parent){
+				x1 += this.parent.mx;
+				y1 += this.parent.my;
+				x2 += this.parent.mx;
+				y2 += this.parent.my;
+			}
+			this._cache.rx1 = x1 - (this.thick / 2);
+			this._cache.ry1 = y1 - (this.thick / 2);
+			this._cache.rx2 = x2 - x1 + (this.thick);
+			this._cache.ry2 = y2 - y1 + (this.thick);
+		}
+
 		if (color == '#FFFFFF')
 			ctx.fillStyle = color;
 		else
 			ctx.fillStyle = '#4D4D4D'; // TODO: global color
 
 		ctx.fillRect(
-			this.x1 - (this.thick / 2),
-			this.y1 - (this.thick / 2),
-			this.x2 - this.x1 + (this.thick),
-			this.y2 - this.y1 + (this.thick));
+			this._cache.rx1,
+			this._cache.ry1,
+			this._cache.rx2,
+			this._cache.ry2);
 
 	};
 

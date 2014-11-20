@@ -20,11 +20,21 @@ define(
 		};
 	
 		ElementArc.prototype.render = function(ctx, color) {
-	
+
+			if(!this._cache){
+				this._cache = {}
+				this._cache.x = this.x;
+				this._cache.y = this.y;
+				if(this.parent){
+					this._cache.x += this.parent.mx;
+					this._cache.y += this.parent.my;
+				}
+			}
+
 			ctx.beginPath();
 			ctx.arc(
-				this.x,
-				this.y,
+				this._cache.x,
+				this._cache.y,
 				this.r1,
 				(Math.PI * 2) - (Math.PI * this.start / 180.0),
 				(Math.PI * 2) - (Math.PI * (this.start + this.sweep) / 180.0),

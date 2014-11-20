@@ -28,9 +28,13 @@ define(
 			this.parts.push(part);
 	
 		};
-	
+
+		Layer.prototype.isEmpty = function(){
+			return this.parts.length == 0;
+		}
+
 		Layer.prototype.render = function(ctx, color){
-	
+
 			if(!color) color = this.pcbv.getLayerColors()[this.number-1];
 	
 			for(var p = 0; p < this.parts.length; p++)
@@ -41,7 +45,7 @@ define(
 		Layer.prototype.renderGL = function(gl, shaderProgram, oMatrix, mvMatrix, color, pins, elements){
 	
 			gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
-	
+
 			gl.viewport(0, 0, this.framebuffer.width, this.framebuffer.height);
 			gl.clearColor(0.0, 0.0, 0.0, 0.0);
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
