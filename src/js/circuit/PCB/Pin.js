@@ -74,6 +74,28 @@ define(function() {
 
 	}
 
+	Pin.prototype.clearGL = function(gl, shaderProgram){
+
+		var splt = this.flags.split(','), square = true;
+
+		for (i = 0; i < splt.length; i++)
+			if (splt[i] == 'square')
+				square = false;
+
+		
+		gl.uniform1f(shaderProgram.roundPointsUniform, square);
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.pointBuffer);
+		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, this.pointBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+		gl.uniform1f(shaderProgram.innerRadiusUniform, 0.0);
+		gl.uniform1f(shaderProgram.pointsizeUniform, (this.thick + this.clear) * gl.scaleFactor);
+		gl.drawArrays(gl.POINTS, 0, this.pointBuffer.numItems);
+
+		gl.uniform1f(shaderProgram.roundPointsUniform, false);
+
+	};
+
 	Pin.prototype.cleanupGL = function(gl){
 
 		if(this.pointBuffer){

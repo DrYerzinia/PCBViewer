@@ -1,10 +1,11 @@
 define(function() {
-	var Via = function(x, y, od, u1, u2, id, u3, u4) {
+	var Via = function(x, y, od, clearance, u2, id, u3, u4) {
 
 		this.x = x;
 		this.y = y;
 		this.od = od;
 		this.id = id;
+		this.clearance = clearance;
 
 	};
 
@@ -44,6 +45,23 @@ define(function() {
 		gl.uniform1f(shaderProgram.roundPointsUniform, false);
 
 	}
+
+	Via.prototype.clearGL = function(gl, shaderProgram){
+
+		gl.uniform1f(shaderProgram.roundPointsUniform, true);
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.pointBuffer);
+		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, this.pointBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+		gl.uniform1f(shaderProgram.innerRadiusUniform, 0.0);
+
+		gl.uniform1f(shaderProgram.pointsizeUniform, (this.od + this.clearance) * gl.scaleFactor);
+		gl.drawArrays(gl.POINTS, 0, this.pointBuffer.numItems);
+
+
+		gl.uniform1f(shaderProgram.roundPointsUniform, false);
+
+	};
 
 	Via.prototype.cleanupGL = function(gl){
 

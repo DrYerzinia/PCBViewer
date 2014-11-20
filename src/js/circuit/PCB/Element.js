@@ -160,6 +160,8 @@ define(
 
 		}
 
+		Element.prototype.clearGL = function(gl, shaderProgram){};
+
 		Element.prototype.cleanupGL = function(gl){
 
 			var i;

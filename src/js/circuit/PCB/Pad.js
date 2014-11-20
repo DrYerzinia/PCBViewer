@@ -40,6 +40,14 @@ define(function() {
 
 	}
 
+	Pad.prototype.clearGL = function(gl, shaderProgram){
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.clearBuffer);
+		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, this.clearBuffer.itemSize, gl.FLOAT, false, 0, 0);
+		gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.clearBuffer.numItems);
+
+	};
+
 	Pad.prototype.cleanupGL = function(gl){
 
 		if(this.vertexBuffer){
@@ -51,17 +59,17 @@ define(function() {
 
 	}
 
-	Pad.prototype.setup3DArrayBuffer = function(gl, x, y){
+	Pad.prototype.generatePadBuffer = function(gl, thick){
 
-		var vBuffer, x1, x2, y1, y2;
+		var vBuffer, vertices, x1, x2, y1, y2;
 
 		vBuffer = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
 
-		x1 = this.parent.mx + this.x1 - (this.thick / 2);
-		y1 = this.parent.my + this.y1 - (this.thick / 2);
-		x2 = x1 + this.x2 - this.x1 + this.thick;
-		y2 = y1 + this.y2 - this.y1 + this.thick;
+		x1 = this.parent.mx + this.x1 - (thick / 2);
+		y1 = this.parent.my + this.y1 - (thick / 2);
+		x2 = x1 + this.x2 - this.x1 + thick;
+		y2 = y1 + this.y2 - this.y1 + thick;
 
 		vertices = [
 		 x2, y2,  0.0,
@@ -75,7 +83,14 @@ define(function() {
 		vBuffer.itemSize = 3;
 		vBuffer.numItems = 4;
 
-		this.vertexBuffer = vBuffer;
+		return vBuffer;
+
+	}
+
+	Pad.prototype.setup3DArrayBuffer = function(gl, x, y){
+
+		this.vertexBuffer = this.generatePadBuffer(gl, this.thick);
+		this.clearBuffer = this.generatePadBuffer(gl, this.thick + this.clear);
 
 	};
 
