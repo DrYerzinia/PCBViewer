@@ -87,6 +87,18 @@ define(
 
 		};
 
+		Polygon.prototype.render = function(ctx, color){
+
+			ctx.beginPath();
+			ctx.moveTo(this.points[0].x, this.points[0].y);
+			for(var i = 1; i < this.points.length; i++)
+				ctx.lineTo(this.points[i].x, this.points[i].y);
+			ctx.closePath();
+			ctx.fillStyle = color;
+			ctx.fill();
+
+		};
+
 		Polygon.prototype.renderGL = function(gl, shaderProgram){
 
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
