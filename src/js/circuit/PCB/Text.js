@@ -81,6 +81,8 @@ define(
 	        gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
 
 		}
+
+		Text.prototype.clearGL = function(gl, shaderProgram){};
 	
 		Text.prototype.cleanupGL = function(gl){}
 

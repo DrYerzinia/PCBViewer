@@ -69,6 +69,8 @@ define(
 	
 		}
 
+		ElementArc.prototype.clearGL = function(gl, shaderProgram){};
+
 		ElementArc.prototype.cleanupGL = function(gl){
 
 			if(this.pointBuffer){

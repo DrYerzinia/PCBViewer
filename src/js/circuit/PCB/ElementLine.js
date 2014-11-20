@@ -45,6 +45,8 @@ define(function() {
 
 	};
 
+	ElementLine.prototype.clearGL = function(gl, shaderProgram){};
+
 	ElementLine.prototype.cleanupGL = function(gl){
 
 		if(this.vertexBuffer){
@@ -63,7 +65,7 @@ define(function() {
 
 	};
 
-	ElementLine.prototype.setup3DArrayBuffer = function(gl, x, y){
+	ElementLine.prototype.generateLineBuffer = function(gl, thickness){
 
 		var vBuffer, ox1, oy1, ox2, oy2, x1, x2, x3, x4, y1, y2, y3, y4;
 
@@ -79,8 +81,8 @@ define(function() {
 		var run = ox2 - ox1;
 		var magnitude = Math.sqrt(rise * rise + run * run);
 
-		var xshift = rise / magnitude * (this.thick / 2);
-		var yshift = run / magnitude * (this.thick / 2);
+		var xshift = rise / magnitude * (thickness / 2);
+		var yshift = run / magnitude * (thickness / 2);
 
 		if(this.parent){
 			ox1 += this.parent.mx;
@@ -110,7 +112,27 @@ define(function() {
 		vBuffer.itemSize = 3;
 		vBuffer.numItems = 4;
 
-		this.vertexBuffer = vBuffer;
+		return vBuffer;
+
+	}
+
+	ElementLine.prototype.setup3DArrayBuffer = function(gl, x, y){
+
+		var vBuffer, ox1, oy1, ox2, oy2;
+
+		ox1 = this.x1;
+		oy1 = this.y1;
+		ox2 = this.x2;
+		oy2 = this.y2;
+
+		if(this.parent){
+			ox1 += this.parent.mx;
+			oy1 += this.parent.my;
+			ox2 += this.parent.mx;
+			oy2 += this.parent.my;
+		}
+
+		this.vertexBuffer = this.generateLineBuffer(gl, this.thick);
 
 		vBuffer = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
