@@ -30,7 +30,7 @@ define(
 			this.scaling = scaling;
 			this.str = str;
 			this.flags = flags;
-	
+
 		};
 	
 		Text.prototype.render = function(ctx, color){

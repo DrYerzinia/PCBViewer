@@ -14,7 +14,6 @@ define(
 				tx, ty, txtdir, txtscl, txtflg) {
 	
 			this.pcbv = pcbv;
-			this.flags = flags;
 			this.desc = desc;
 			this.refdes = refdes;
 			this.mx = mx;
@@ -26,16 +25,21 @@ define(
 			this.txtflg = txtflg;
 			this.parts = [];
 	
+			this.flags = {
+				hidename: false,
+				onsolder: false
+			};
+
+			var split = flags.split(','), i;
+
+			for(i = 0; i < split.length; i++)
+				this.flags[split[i]] = true;
+
 		};
 	
 		Element.prototype.onsolder = function() {
 	
-			var splt = this.flags.split(',');
-	
-			for (var i = 0; i < splt.length; i++)
-				if (splt[i] == 'onsolder')
-					return true;
-			return false;
+			return this.flags.onsolder;
 	
 		};
 	
@@ -60,37 +64,40 @@ define(
 				ctx.restore();
 				return;
 			}
-	
-			switch(this.txtdir) {
-				case 0:
-					rot = 0;
-					break;
-				case 1:
-					rot = -0.5 * Math.PI;
-					break;
-				case 2:
-					rot = Math.PI;
-					break;
-				case 3:
-					rot = 0.5 * Math.PI;
-					break;
+
+			if(!this.flags.hidename){
+
+				switch(this.txtdir) {
+					case 0:
+						rot = 0;
+						break;
+					case 1:
+						rot = -0.5 * Math.PI;
+						break;
+					case 2:
+						rot = Math.PI;
+						break;
+					case 3:
+						rot = 0.5 * Math.PI;
+						break;
+				}
+		
+				ctx.save();
+				ctx.translate(this.tx, this.ty);
+		
+				if (mirror)
+					ctx.scale(1, -1);
+		
+				ctx.rotate(rot);
+		
+				for (i = 0; i < this.refdes.length; i++) {
+					sym = this.pcbv.symbols[this.refdes[i]];
+					sym.render(ctx, color);
+					ctx.translate(sym.width + 1000, 0);
+				}
+		
+				ctx.restore();
 			}
-	
-			ctx.save();
-			ctx.translate(this.tx, this.ty);
-	
-			if (mirror)
-				ctx.scale(1, -1);
-	
-			ctx.rotate(rot);
-	
-			for (i = 0; i < this.refdes.length; i++) {
-				sym = this.pcbv.symbols[this.refdes[i]];
-				sym.render(ctx, color);
-				ctx.translate(sym.width + 1000, 0);
-			}
-	
-			ctx.restore();
 	
 			ctx.restore();
 	
@@ -144,7 +151,8 @@ define(
 
 		Element.prototype.renderGL = function(gl, shaderProgram){
 
-			this.renderText(gl, shaderProgram);
+			if(!this.flags.hidename)
+				this.renderText(gl, shaderProgram);
 
 			//var i;
 			//for(i = 0; i < this.parts.length; i++)
