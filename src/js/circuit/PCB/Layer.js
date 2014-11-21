@@ -17,32 +17,88 @@ define(
 	
 			if(parts) this.parts = parts;
 			else this.parts = [];
+
+			this.polygons = [];
 	
 		};
 	
 		Layer.SOLDER = 0;
 		Layer.TOP = 1;
-	
-		Layer.prototype.addPart = function(part){
-	
-			this.parts.push(part);
-	
-		};
 
-		Layer.prototype.isEmpty = function(){
-			return this.parts.length == 0;
+		Layer.prototype._renderPolygons = function(ctx, color, pins, elements){
+
+			// render clear polygons first
+			for(i = 0; i < this.polygons.length; i++)
+				this.polygons[i].render(ctx, color);
+
+			// clear pins, same layer pads, and other clearing objects
+			ctx.globalCompositeOperation = "destination-out";
+			ctx.fillStyle = '#FFFFFF';
+			for(i = 0; i < this.parts.length; i++)
+					this.parts[i].clear(ctx);
+			if(elements)
+				for(i = 0; i < elements.parts.length; i++)
+					elements.parts[i].clear(ctx);
+			if(pins)
+				for(i = 0; i < pins.parts.length; i++)
+					pins.parts[i].clear(ctx);
+			ctx.globalCompositeOperation = "source-over";
+
+			// Render non clearing polygons
+
 		}
 
-		Layer.prototype.render = function(ctx, color){
+		Layer.prototype._renderPolygonsGL = function(gl, shaderProgram, color, pins, elements){
+
+			// render clear polygons first
+			gl.uniform4f(shaderProgram.vColorUniform, color.r, color.g, color.b, 1.0);
+			for(i = 0; i < this.polygons.length; i++)
+				this.polygons[i].renderGL(gl, shaderProgram);
+
+			// render alpha of pins, same layer pads, and other clearing objects
+			gl.uniform4f(shaderProgram.vColorUniform, 0.0, 0.0, 0.0, 0.0);
+			for(i = 0; i < this.parts.length; i++)
+				this.parts[i].clearGL(gl, shaderProgram);
+			if(pins)
+				for(i = 0; i < pins.parts.length; i++)
+					pins.parts[i].clearGL(gl, shaderProgram);
+			if(elements)
+				for(i = 0; i < elements.parts.length; i++)
+					elements.parts[i].clearGL(gl, shaderProgram);
+
+			// render non clear polygons
+
+		}
+
+		Layer.prototype.isEmpty = function(){
+			return this.parts.length == 0 && this.polygons.length == 0;
+		}
+
+		Layer.prototype.hasPolygons = function(){
+			return this.polygons.length != 0;
+		};
+
+		Layer.prototype.addPart = function(part){
+			this.parts.push(part);
+		};
+
+		Layer.prototype.seperatePolygons = function(){
+			for(var i = 0; i < this.parts.length; i++)
+				if(this.parts[i] instanceof Polygon)
+					this.polygons.push(this.parts.splice(i, 1)[0]);
+		};
+
+		Layer.prototype.render = function(ctx, color, pins, elements){
 
 			if(!color) color = this.pcbv.getLayerColors()[this.number-1];
-	
-			for(var p = 0; p < this.parts.length; p++)
-				this.parts[p].render(ctx, color);
-	
+
+			if(this.hasPolygons()) this._renderPolygons(ctx, color, pins, elements);
+			for(var i = 0; i < this.parts.length; i++)
+				this.parts[i].render(ctx, color);
+			
 		};
 	
-		Layer.prototype.renderGL = function(gl, shaderProgram, oMatrix, mvMatrix, color, pins, elements){
+		Layer.prototype.renderGL = function(gl, shaderProgram, color, pins, elements){
 	
 			gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
 
@@ -50,38 +106,10 @@ define(
 			gl.clearColor(0.0, 0.0, 0.0, 0.0);
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	
-			// render clear polygons first
-			// render alpha of pins, same layer pads, and other clearing objects
-			// render non clear polygons
-			// render rest like normal
-	
+			if(this.hasPolygons()) this._renderPolygonsGL(gl, shaderProgram, color, pins, elements);
 			gl.uniform4f(shaderProgram.vColorUniform, color.r, color.g, color.b, 1.0);
-	
-			var i;
-
-			for(i = 0; i < this.parts.length; i++)
-				if(this.parts[i] instanceof Polygon)
-					this.parts[i].renderGL(gl, shaderProgram);
-
-			gl.uniform4f(shaderProgram.vColorUniform, 0.0, 0.0, 0.0, 0.0);
-			for(i = 0; i < this.parts.length; i++)
-				if(!(this.parts[i] instanceof Polygon))
-					this.parts[i].clearGL(gl, shaderProgram);
-
-			if(pins){
-				for(i = 0; i < pins.parts.length; i++)
-					pins.parts[i].clearGL(gl, shaderProgram);
-			}
-			if(elements){
-				for(i = 0; i < elements.parts.length; i++)
-					elements.parts[i].clearGL(gl, shaderProgram);
-			}
-
-			gl.uniform4f(shaderProgram.vColorUniform, color.r, color.g, color.b, 1.0);
-
-			for(i = 0; i < this.parts.length; i++)
-				if(!(this.parts[i] instanceof Polygon))
-					this.parts[i].renderGL(gl, shaderProgram);
+			for(var i = 0; i < this.parts.length; i++)
+				this.parts[i].renderGL(gl, shaderProgram);
 
 		}
 	
@@ -102,7 +130,9 @@ define(
 			var i;
 			for(i = 0; i < this.parts.length; i++)
 				this.parts[i].setup3DArrayBuffer(gl, 0, 0);
-	
+			for(i = 0; i < this.polygons.length; i++)
+				this.polygons[i].setup3DArrayBuffer(gl, 0, 0);
+
 		}
 	
 		Layer.prototype.resizeFrameBuffer = function(gl){

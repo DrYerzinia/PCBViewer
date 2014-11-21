@@ -10,27 +10,46 @@ define(function() {
 
 	};
 
-	ElementLine.prototype.render = function(ctx, color) {
+	ElementLine.prototype._createCache = function(){
 
-		var x1 = this.x1, y1 = this.y1, x2 = this.x2, y2 = this.y2;
-		
+		this._cache = {};
+
+		this._cache.x1 = this.x1;
+		this._cache.y1 = this.y1;
+		this._cache.x2 = this.x2;
+		this._cache.y2 = this.y2;
 		if(this.parent){
-			x1 += this.parent.mx;
-			y1 += this.parent.my;
-			x2 += this.parent.mx;
-			y2 += this.parent.my;
+			this._cache.x1 += this.parent.mx;
+			this._cache.y1 += this.parent.my;
+			this._cache.x2 += this.parent.mx;
+			this._cache.y2 += this.parent.my;
 		}
 
-		ctx.beginPath();
-		ctx.moveTo(x1, y1);
-		ctx.lineTo(x2, y2);
+	};
+
+	ElementLine.prototype._prepareRender = function(ctx, thick){
+
+		if(!this._cache) this._createCache();
+
 		ctx.lineCap = 'round';
-		ctx.lineWidth = this.thick;
+		ctx.lineWidth = thick;
+
+		ctx.beginPath();
+		ctx.moveTo(this._cache.x1, this._cache.y1);
+		ctx.lineTo(this._cache.x2, this._cache.y2);
+
+	};
+
+	ElementLine.prototype.render = function(ctx, color) {
+
 		ctx.strokeStyle = color;
+		this._prepareRender(ctx, this.thick, color);
 		ctx.stroke();
 		ctx.closePath();
 
 	};
+
+	ElementLine.prototype.clear = function(ctx){};
 
 	ElementLine.prototype.renderGL = function(gl, shaderProgram){
 
@@ -39,11 +58,6 @@ define(function() {
 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vertexBuffer.numItems);
 
 		gl.uniform1f(shaderProgram.innerRadiusUniform, 0.0);
-
-		//gl.lineWidth(this.thick * gl.scaleFactor);
-		//gl.bindBuffer(gl.ARRAY_BUFFER, this.pointBuffer);
-		//gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, this.pointBuffer.itemSize, gl.FLOAT, false, 0, 0);
-		//gl.drawArrays(gl.LINES, 0, this.pointBuffer.numItems);
 
 		gl.uniform1f(shaderProgram.pointsizeUniform, this.thick*gl.scaleFactor);
 		gl.uniform1f(shaderProgram.roundPointsUniform, true);

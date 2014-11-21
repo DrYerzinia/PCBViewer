@@ -88,6 +88,8 @@ define(
 			ctx.restore();
 		};
 
+		Element.prototype.clear = function(ctx){};
+
 		Element.prototype.renderText = function(gl, shaderProgram){
 
 			var sym, rot, mvMatrix;

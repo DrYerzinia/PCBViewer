@@ -1,12 +1,12 @@
 define(function() {
 
 	// Pin [x y thickness clearance mask drillholedia name number flags]
-	var Pin = function(x, y, thick, clear, mask, drill, name, num, flags) {
+	var Pin = function(x, y, thick, clearance, mask, drill, name, num, flags) {
 
 		this.x = x;
 		this.y = y;
 		this.thick = thick;
-		this.clear = clear;
+		this.clearance = clearance;
 		this.mask = mask;
 		this.drill = drill;
 		this.name = name;
@@ -21,22 +21,24 @@ define(function() {
 
 	};
 
+	Pin.prototype._createCache = function(){
+
+		this._cache = {};
+
+		this._cache.x = this.x;
+		this._cache.y = this.y;
+		if(this.parent){
+			this._cache.x += this.parent.mx;
+			this._cache.y += this.parent.my;
+		}
+		this._cache.rx = this._cache.x - (this.thick / 2);
+		this._cache.ry = this._cache.y - (this.thick / 2);
+
+	}
+
 	Pin.prototype.render = function(ctx, color) {
 
-		if(!this._cache){
-
-			this._cache = {};
-
-			this._cache.x = this.x;
-			this._cache.y = this.y;
-			if(this.parent){
-				this._cache.x += this.parent.mx;
-				this._cache.y += this.parent.my;
-			}
-			this._cache.rx = this._cache.x - (this.thick / 2);
-			this._cache.ry = this._cache.y - (this.thick / 2);
-
-		}
+		if(!this._cache) this._createCache();
 
 		if(color == '#FFFFFF')
 			return;
@@ -55,6 +57,17 @@ define(function() {
 		ctx.arc(this._cache.x, this._cache.y, this.drill / 2, 0, Math.PI * 2, true);
 		ctx.closePath();
 		ctx.fillStyle = '#E5E5E5'; // TODO: set colors to global option
+		ctx.fill();
+
+	};
+
+	Pin.prototype.clear = function(ctx){
+
+		if(!this._cache) this._createCache();
+
+		ctx.beginPath();
+		ctx.arc(this._cache.x, this._cache.y, (this.clearance + this.thick) / 2.0, 0, Math.PI * 2, true);
+		ctx.closePath();
 		ctx.fill();
 
 	};
@@ -89,7 +102,7 @@ define(function() {
 		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, this.pointBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
 		gl.uniform1f(shaderProgram.innerRadiusUniform, 0.0);
-		gl.uniform1f(shaderProgram.pointsizeUniform, (this.thick + this.clear) * gl.scaleFactor);
+		gl.uniform1f(shaderProgram.pointsizeUniform, (this.thick + this.clearance) * gl.scaleFactor);
 		gl.drawArrays(gl.POINTS, 0, this.pointBuffer.numItems);
 
 		gl.uniform1f(shaderProgram.roundPointsUniform, false);

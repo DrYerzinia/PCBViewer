@@ -1,14 +1,14 @@
 define(function() {
 
 	// Pad [x1 y1 x2 y2 thickness clearance mask name pad_number flags]
-	var Pad = function(x1, y1, x2, y2, thick, clear, mask, name, pnum, flags) {
+	var Pad = function(x1, y1, x2, y2, thick, clearance, mask, name, pnum, flags) {
 
 		this.x1 = x1;
 		this.y1 = y1;
 		this.x2 = x2;
 		this.y2 = y2;
 		this.thick = thick;
-		this.clear = clear;
+		this.clearance = clearance;
 		this.mask = mask;
 		this.name = name;
 		this.pnum = pnum;
@@ -16,29 +16,40 @@ define(function() {
 
 	};
 
+	Pad.prototype._createCache = function(){
+	
+		var x1, y2, x2, y2, thk;
+
+		this._cache = {};
+
+		x1 = this.x1;
+		y1 = this.y1;
+		x2 = this.x2;
+		y2 = this.y2;
+		if(this.parent){
+			x1 += this.parent.mx;
+			y1 += this.parent.my;
+			x2 += this.parent.mx;
+			y2 += this.parent.my;
+		}
+
+		thk = this.thick;
+		this._cache.rx1 = x1 - (thk / 2);
+		this._cache.ry1 = y1 - (thk / 2);
+		this._cache.rx2 = x2 - x1 + thk;
+		this._cache.ry2 = y2 - y1 + thk;
+
+		thk = this.thick + this.clearance;
+		this._cache.rcx1 = x1 - (thk / 2);
+		this._cache.rcy1 = y1 - (thk / 2);
+		this._cache.rcx2 = x2 - x1 + thk;
+		this._cache.rcy2 = y2 - y1 + thk;
+
+	};
+
 	Pad.prototype.render = function(ctx, color) {
 
-		if(!this._cache){
-			
-			var x1, y2, x2, y2;
-
-			this._cache = {};
-
-			x1 = this.x1;
-			y1 = this.y1;
-			x2 = this.x2;
-			y2 = this.y2;
-			if(this.parent){
-				x1 += this.parent.mx;
-				y1 += this.parent.my;
-				x2 += this.parent.mx;
-				y2 += this.parent.my;
-			}
-			this._cache.rx1 = x1 - (this.thick / 2);
-			this._cache.ry1 = y1 - (this.thick / 2);
-			this._cache.rx2 = x2 - x1 + (this.thick);
-			this._cache.ry2 = y2 - y1 + (this.thick);
-		}
+		if(!this._cache) this._createCache();
 
 		if (color == '#FFFFFF')
 			ctx.fillStyle = color;
@@ -53,14 +64,25 @@ define(function() {
 
 	};
 
+	Pad.prototype.clear = function(ctx){
+
+		if(!this._cache) this._createCache();
+
+		ctx.fillRect(
+			this._cache.rcx1,
+			this._cache.rcy1,
+			this._cache.rcx2,
+			this._cache.rcy2);
+
+	};
+
 	Pad.prototype.renderGL = function(gl, shaderProgram){
 
-		gl.uniform4f(shaderProgram.vColorUniform, 0.35, 0.35, 0.35, 1.0);
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
 		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, this.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vertexBuffer.numItems);
 
-	}
+	};
 
 	Pad.prototype.clearGL = function(gl, shaderProgram){
 
@@ -112,7 +134,7 @@ define(function() {
 	Pad.prototype.setup3DArrayBuffer = function(gl, x, y){
 
 		this.vertexBuffer = this.generatePadBuffer(gl, this.thick);
-		this.clearBuffer = this.generatePadBuffer(gl, this.thick + this.clear);
+		this.clearBuffer = this.generatePadBuffer(gl, this.thick + this.clearance);
 
 	};
 

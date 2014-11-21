@@ -55,6 +55,8 @@ define(
 			else
 				this.otherLayers.push(layer);
 
+			layer.seperatePolygons();
+
 		};
 
 		Renderer.prototype.destroy = function(){throw new NotImplementedException("Renderer.destroy is virtual function");};

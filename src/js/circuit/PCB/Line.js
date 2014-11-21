@@ -30,6 +30,16 @@ define(
 	
 		Class.extend(ElementLine, Line);
 
+		Line.prototype.clear = function(ctx){
+
+			if(this.flags.clearline){
+				this._prepareRender(ctx, this.thick + this.clearance);
+				ctx.stroke();
+				ctx.closePath();
+			}
+
+		};
+
 		Line.prototype.clearGL = function(gl, shaderProgram){
 
 			if(this.flags.clearline){

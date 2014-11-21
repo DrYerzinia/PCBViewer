@@ -47,7 +47,9 @@ define(
 			ctx.closePath();
 	
 		};
-	
+
+		ElementArc.prototype.clear = function(ctx){};
+
 		ElementArc.prototype.renderGL = function(gl, shaderProgram){
 	
 			var outerRadius, innerRadius, radiusRatio;

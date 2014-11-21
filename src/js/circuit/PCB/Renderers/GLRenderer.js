@@ -218,23 +218,23 @@ define(
 
 			if(side == Layer.TOP){
 
-				this.topSilk.renderGL(gl, this.shaderProgram, oMatrix, mvMatrix, {r: 0.0, g: 0.0, b: 0.0}, this.pins, null);
-				this.bottomSilk.renderGL(gl, this.shaderProgram, oMatrix, mvMatrix, {r: 1.0, g: 1.0, b: 1.0}, this.pins, null);
+				this.topSilk.renderGL(gl, this.shaderProgram, {r: 0.0, g: 0.0, b: 0.0}, this.pins, null);
+				this.bottomSilk.renderGL(gl, this.shaderProgram, {r: 1.0, g: 1.0, b: 1.0}, this.pins, null);
 
-				this.top.renderGL(gl, this.shaderProgram, oMatrix, mvMatrix, {r: 1.0, g: 1.0, b: 1.0}, this.pins, null);
-				this.solder.renderGL(gl, this.shaderProgram, oMatrix, mvMatrix, {r: 0.0, g: 0.0, b: 0.0}, this.pins, null);
+				this.top.renderGL(gl, this.shaderProgram, {r: 1.0, g: 1.0, b: 1.0}, this.pins, null);
+				this.solder.renderGL(gl, this.shaderProgram, {r: 0.35, g: 0.35, b: 0.35}, this.pins, null);
 
 			} else {
 
-				this.topSilk.renderGL(gl, this.shaderProgram, oMatrix, mvMatrix, {r: 1.0, g: 1.0, b: 1.0}, this.pins, null);
-				this.bottomSilk.renderGL(gl, this.shaderProgram, oMatrix, mvMatrix, {r: 0.0, g: 0.0, b: 0.0}, this.pins, null);
+				this.topSilk.renderGL(gl, this.shaderProgram, {r: 1.0, g: 1.0, b: 1.0}, this.pins, null);
+				this.bottomSilk.renderGL(gl, this.shaderProgram,{r: 0.0, g: 0.0, b: 0.0}, this.pins, null);
 
-				this.top.renderGL(gl, this.shaderProgram, oMatrix, mvMatrix, {r: 0.0, g: 0.0, b: 0.0}, this.pins, null);
-				this.solder.renderGL(gl, this.shaderProgram, oMatrix, mvMatrix, {r: 1.0, g: 1.0, b: 1.0}, this.pins, null);
+				this.top.renderGL(gl, this.shaderProgram, {r: 0.35, g: 0.35, b: 0.35}, this.pins, null);
+				this.solder.renderGL(gl, this.shaderProgram, {r: 1.0, g: 1.0, b: 1.0}, this.pins, null);
 
 			}
 
-			this.pins.renderGL(gl, this.shaderProgram, oMatrix, mvMatrix, {r: 1.0, g: 1.0, b: 1.0}, null);
+			this.pins.renderGL(gl, this.shaderProgram, {r: 1.0, g: 1.0, b: 1.0}, null);
 
 			for(l = 0; l < this.otherLayers.length; l++){
 
@@ -245,11 +245,11 @@ define(
 				b = parseInt(color.substring(5, 7), 16) / 256;
 
 				if(this.otherLayers[l].name == "bottom")
-					this.otherLayers[l].renderGL(gl, this.shaderProgram, oMatrix, mvMatrix, {r: r, g: g, b: b}, this.pins, this.solder);
+					this.otherLayers[l].renderGL(gl, this.shaderProgram, {r: r, g: g, b: b}, this.pins, this.solder);
 				else if(this.otherLayers[l].name == "top")
-					this.otherLayers[l].renderGL(gl, this.shaderProgram, oMatrix, mvMatrix, {r: r, g: g, b: b}, this.pins, this.top);
+					this.otherLayers[l].renderGL(gl, this.shaderProgram, {r: r, g: g, b: b}, this.pins, this.top);
 				else
-					this.otherLayers[l].renderGL(gl, this.shaderProgram, oMatrix, mvMatrix, {r: r, g: g, b: b}, this.pins, null);
+					this.otherLayers[l].renderGL(gl, this.shaderProgram, {r: r, g: g, b: b}, this.pins, null);
 
 			}
 

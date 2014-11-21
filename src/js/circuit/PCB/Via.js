@@ -25,6 +25,15 @@ define(function() {
 
 	};
 
+	Via.prototype.clear = function(ctx){
+
+		ctx.beginPath();
+		ctx.arc(this.x, this.y, (this.clearance + this.od) / 2.0, 0, Math.PI * 2, true);
+		ctx.closePath();
+		ctx.fill();
+
+	};
+
 	Via.prototype.renderGL = function(gl, shaderProgram){
 
 		gl.uniform1f(shaderProgram.roundPointsUniform, true);

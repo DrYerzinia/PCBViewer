@@ -53,7 +53,9 @@ define(
 			ctx.restore();
 	
 		};
-	
+
+		Text.prototype.clear = function(ctx){};
+
 		Text.prototype.renderGL = function(gl, shaderProgram){
 
 			var sym, mvMatrix;
