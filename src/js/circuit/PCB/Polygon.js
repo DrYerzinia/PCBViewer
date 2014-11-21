@@ -4,17 +4,16 @@ define(
 
 		var Polygon = function(flags, points){
 
-			this.flags = {};
+			this.flags = {
+				clearpoly: false
+			};
 			this.points = points;
 
 			var split, i;
 
 			split = flags.split(',');
-			for(i = 0; i < split.length; i++){
-
-				//
-
-			}
+			for(i = 0; i < split.length; i++)
+				this.flags[split[i]] = true;
 
 			// Decompose into triangles
 			// turn into doubly linked list
@@ -85,6 +84,10 @@ define(
 
 			this.triangles = triangles;
 
+		};
+
+		Polygon.prototype.isClear = function(){
+			return this.flags.clearpoly;
 		};
 
 		Polygon.prototype.render = function(ctx, color){

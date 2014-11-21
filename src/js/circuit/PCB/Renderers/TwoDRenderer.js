@@ -18,7 +18,7 @@ define(
 
 		Class.extend(Renderer, TwoDRenderer);
 
-		TwoDRenderer.prototype._renderLayer = function(ctx, bufferCtx, bufferCanvas, layer, color){
+		TwoDRenderer.prototype._renderLayer = function(layer, color){
 
 			var components = null;
 
@@ -27,9 +27,15 @@ define(
 				if(layer.name == "bottom") components = this.solder;
 				else if(layer.name == "top") components = this.top;
 
-				bufferCtx.clearRect(0, 0, bufferCanvas.width, bufferCanvas.height);
-				layer.render(bufferCtx, color, this.pins, components);
-				ctx.drawImage(bufferCanvas, 0, 0);
+				// Clear Buffer, have to reset transform for this
+				this.bufferCtx.save();
+				this.bufferCtx.setTransform(1,0,0,1,0,0);
+				this.bufferCtx.clearRect(0, 0, this.bufferCanvas.width, this.bufferCanvas.height);
+				this.bufferCtx.restore();
+
+				layer.render(this.bufferCtx, color, this.pins, components);
+
+				this.ctx.drawImage(this.bufferCanvas, 0, 0);
 
 			}
 
@@ -83,23 +89,23 @@ define(
 			this.ctx.globalAlpha = 0.5;
 			if(side != Layer.TOP){
 
-	        	this._renderLayer(this.ctx, this.bufferCtx, this.bufferCanvas, this.topSilk, '#FFFFFF', null);
-	        	this._renderLayer(this.ctx, this.bufferCtx, this.bufferCanvas, this.solder, '#FFFFFF', null);
+	        	this._renderLayer(this.topSilk, '#FFFFFF', null);
+	        	this._renderLayer(this.solder, '#FFFFFF', null);
 	        	for(l = this.otherLayers.length - 1; l >= 0; l--)
-	        		this._renderLayer(this.ctx, this.bufferCtx, this.bufferCanvas, this.otherLayers[l], null, null);
-	        	this._renderLayer(this.ctx, this.bufferCtx, this.bufferCanvas, this.top, '#000000', null);
-	        	this._renderLayer(this.ctx, this.bufferCtx, this.bufferCanvas, this.pins, null, null);
-	        	this._renderLayer(this.ctx, this.bufferCtx, this.bufferCanvas, this.bottomSilk, '#000000', null);
+	        		this._renderLayer(this.otherLayers[l], null, null);
+	        	this._renderLayer(this.top, '#000000', null);
+	        	this._renderLayer(this.pins, null, null);
+	        	this._renderLayer(this.bottomSilk, '#000000', null);
 
 	        } else {
 
-	        	this._renderLayer(this.ctx, this.bufferCtx, this.bufferCanvas, this.bottomSilk, '#FFFFFF', null);
-	        	this._renderLayer(this.ctx, this.bufferCtx, this.bufferCanvas, this.top, '#FFFFFF', null);
+	        	this._renderLayer(this.bottomSilk, '#FFFFFF', null);
+	        	this._renderLayer(this.top, '#FFFFFF', null);
 	        	for(l = 0; l < this.otherLayers.length; l++)
-	        		this._renderLayer(this.ctx, this.bufferCtx, this.bufferCanvas, this.otherLayers[l], null, null);
-	        	this._renderLayer(this.ctx, this.bufferCtx, this.bufferCanvas, this.solder, '#000000', null);
-	        	this._renderLayer(this.ctx, this.bufferCtx, this.bufferCanvas, this.pins, null, null);
-	        	this._renderLayer(this.ctx, this.bufferCtx, this.bufferCanvas, this.topSilk, '#000000', null);
+	        		this._renderLayer(this.otherLayers[l], null, null);
+	        	this._renderLayer(this.solder, '#000000', null);
+	        	this._renderLayer(this.pins, null, null);
+	        	this._renderLayer(this.topSilk, '#000000', null);
 
 	        }
 		
