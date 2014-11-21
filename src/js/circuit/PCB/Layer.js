@@ -48,7 +48,7 @@ define(
 						elements.parts[i].clear(ctx);
 				if(pins)
 					for(i = 0; i < pins.parts.length; i++)
-						pins.parts[i].clear(ctx);
+						pins.parts[i].clear(ctx, this.number);
 				ctx.globalCompositeOperation = "source-over";
 			}
 
