@@ -50,12 +50,22 @@ define(
 					for(i = 0; i < pins.parts.length; i++)
 						pins.parts[i].clear(ctx, this.number);
 				ctx.globalCompositeOperation = "source-over";
+
 			}
 
 			// Render non clearing polygons
 			for(i = 0; i < this.polygons.length; i++)
 				if(!this.polygons[i].isClear())
 					this.polygons[i].render(ctx, color);
+
+			// Clear centers
+			ctx.globalCompositeOperation = "destination-out";
+			ctx.strokeStyle = 'rgba(0,0,0,1)';
+			ctx.fillStyle = 'rgba(0,0,0,1)';
+			if(pins)
+				for(i = 0; i < pins.parts.length; i++)
+					pins.parts[i].clearInner(ctx);
+			ctx.globalCompositeOperation = "source-over";
 
 		}
 

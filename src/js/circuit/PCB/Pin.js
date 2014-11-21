@@ -1,8 +1,10 @@
 define(
 	[
+	 	"./Thermal",
 	 	"./parseFlags"
 	],
 	function(
+		Thermal,
 		parseFlags
 	){
 	
@@ -18,7 +20,7 @@ define(
 			this.name = name;
 			this.num = num;
 			this.flags = parseFlags(Pin._defaultFlags, flags);
-	
+
 		};
 	
 		Pin._defaultFlags = {
@@ -64,16 +66,38 @@ define(
 			ctx.fill();
 	
 		};
-	
-		Pin.prototype.clear = function(ctx){
+
+		Pin.prototype.clear = function(ctx, layerNumber){
 	
 			if(!this._cache) this._createCache();
-	
+
+			var thrm, i;
+
+			thrm = this.flags.thermal;
+			if(thrm){
+				thrm = Thermal.findThermal(thrm, layerNumber);
+				if(thrm)
+					thrm.clear(ctx, this._cache.x, this._cache.y, this.clearance, this.thick, this.drill);
+			}
+
+			if(!thrm){
+				ctx.beginPath();
+				ctx.arc(this._cache.x, this._cache.y, (this.clearance + this.thick) / 2.0, 0, Math.PI * 2, true);
+				ctx.closePath();
+				ctx.fill();
+			}
+
+		};
+
+		Pin.prototype.clearInner = function(ctx){
+
+			if(!this._cache) this._createCache();
+
 			ctx.beginPath();
-			ctx.arc(this._cache.x, this._cache.y, (this.clearance + this.thick) / 2.0, 0, Math.PI * 2, true);
+			ctx.arc(this._cache.x, this._cache.y, this.drill / 2.0, 0, Math.PI * 2, true);
 			ctx.closePath();
 			ctx.fill();
-	
+
 		};
 	
 		Pin.prototype.renderGL = function(gl, shaderProgram){

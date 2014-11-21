@@ -1,8 +1,10 @@
 define(
 	[
+	 	"./Thermal",
 	 	"./parseFlags"
 	],
 	function(
+		Thermal,
 		parseFlags
 	){
 
@@ -38,24 +40,31 @@ define(
 	
 		Via.prototype.clear = function(ctx, layerNumber){
 
-			var thrm, i;
-
-			thrm = this.flags.thermal;
-
+			var thrm = this.flags.thermal;
 			if(thrm){
-				for(i = 0; i < thrm.length; i++){
-					if(layerNumber - 1 == thrm[i].number)
-						console.log("thrm");
-				}
+				thrm = Thermal.findThermal(thrm, layerNumber);
+				if(thrm)
+					thrm.clear(ctx, this.x, this.y, this.clearance, this.od, this.id);
 			}
 
+			if(!thrm){
+				ctx.beginPath();
+				ctx.arc(this.x, this.y, (this.clearance + this.od) / 2.0, 0, Math.PI * 2, true);
+				ctx.closePath();
+				ctx.fill();
+			}
+
+		};
+
+		Via.prototype.clearInner = function(ctx){
+
 			ctx.beginPath();
-			ctx.arc(this.x, this.y, (this.clearance + this.od) / 2.0, 0, Math.PI * 2, true);
+			ctx.arc(this.x, this.y, this.id / 2.0, 0, Math.PI * 2, true);
 			ctx.closePath();
 			ctx.fill();
-	
+
 		};
-	
+
 		Via.prototype.renderGL = function(gl, shaderProgram){
 	
 			gl.uniform1f(shaderProgram.roundPointsUniform, true);
