@@ -121,6 +121,51 @@ define(
 
 		};
 
+		Thermal._clearArc = function(gl, shaderProgram, pointBuffer, ang1, ang2, outerDiameter, innerDiameter, clearance){
+
+
+			gl.bindBuffer(gl.ARRAY_BUFFER, pointBuffer);
+			gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, pointBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+			gl.uniform1f(shaderProgram.roundPointsUniform, true);
+			gl.uniform1f(shaderProgram.arcEnabledUniform, true);
+			gl.uniform1f(shaderProgram.innerRadiusUniform, innerDiameter / outerDiameter / 2);
+			gl.uniform1f(shaderProgram.pointsizeUniform, outerDiameter * gl.scaleFactor);
+			gl.uniform1f(shaderProgram.startAngleUniform, ang1 + ang2);
+			gl.uniform1f(shaderProgram.sweepUniform, Math.PI / 2 - ang2 * 2);
+			gl.uniform1f(shaderProgram.shaveInsideUniform, clearance / outerDiameter / 4);
+			gl.drawArrays(gl.POINTS, 0, pointBuffer.numItems);
+
+			gl.uniform1f(shaderProgram.roundPointsUniform, false);
+			gl.uniform1f(shaderProgram.roundPointsUniform, false);
+			gl.uniform1f(shaderProgram.arcEnabledUniform, false);
+			gl.uniform1f(shaderProgram.shaveInsideUniform, 0.0);
+
+		};
+
+		Thermal.prototype.clearGL = function(gl, shaderProgram, pointBuffer, clearance, outerDiameter, innerDiameter){
+			switch(this.type){
+				case 'S':
+					break;
+				case 't':
+					break;
+				case 'X':
+					break;
+				case '+':
+					var radius = (clearance + outerDiameter) / 2;
+					var clearanceAngle = clearance / radius / 4;
+					Thermal._clearArc(gl, shaderProgram, pointBuffer, 0, clearanceAngle, outerDiameter + clearance, outerDiameter, clearance);
+					Thermal._clearArc(gl, shaderProgram, pointBuffer, Math.PI * 0.5, clearanceAngle, outerDiameter + clearance, outerDiameter, clearance);
+					Thermal._clearArc(gl, shaderProgram, pointBuffer, Math.PI, clearanceAngle, outerDiameter + clearance, outerDiameter, clearance);
+					Thermal._clearArc(gl, shaderProgram, pointBuffer, Math.PI * 1.5, clearanceAngle, outerDiameter + clearance, outerDiameter, clearance);
+					break;
+				case 'O':
+					break;
+				default:
+					break;
+			}
+		};
+
 		return Thermal;
 
 	}

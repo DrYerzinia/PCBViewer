@@ -77,7 +77,7 @@ define(
 			if(thrm){
 				thrm = Thermal.findThermal(thrm, layerNumber);
 				if(thrm)
-					thrm.clear(ctx, this._cache.x, this._cache.y, this.clearance, this.thick, this.drill);
+					thrm.clear(ctx, this.pointBuffer, this.clearance, this.thick, this.drill);
 			}
 
 			if(!thrm){
@@ -122,18 +122,27 @@ define(
 	
 		}
 	
-		Pin.prototype.clearGL = function(gl, shaderProgram){
+		Pin.prototype.clearGL = function(gl, shaderProgram, layerNumber){
 	
-			gl.uniform1f(shaderProgram.roundPointsUniform, !this.flags.square);
-	
-			gl.bindBuffer(gl.ARRAY_BUFFER, this.pointBuffer);
-			gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, this.pointBuffer.itemSize, gl.FLOAT, false, 0, 0);
-	
-			gl.uniform1f(shaderProgram.innerRadiusUniform, 0.0);
-			gl.uniform1f(shaderProgram.pointsizeUniform, (this.thick + this.clearance) * gl.scaleFactor);
-			gl.drawArrays(gl.POINTS, 0, this.pointBuffer.numItems);
-	
-			gl.uniform1f(shaderProgram.roundPointsUniform, false);
+			var thrm = this.flags.thermal;
+			if(thrm){
+				thrm = Thermal.findThermal(thrm, layerNumber);
+				if(thrm)
+					thrm.clearGL(gl, shaderProgram, this.pointBuffer, this.clearance, this.thick, this.drill);
+			}
+
+			if(!thrm){
+				gl.uniform1f(shaderProgram.roundPointsUniform, !this.flags.square);
+		
+				gl.bindBuffer(gl.ARRAY_BUFFER, this.pointBuffer);
+				gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, this.pointBuffer.itemSize, gl.FLOAT, false, 0, 0);
+		
+				gl.uniform1f(shaderProgram.innerRadiusUniform, 0.0);
+				gl.uniform1f(shaderProgram.pointsizeUniform, (this.thick + this.clearance) * gl.scaleFactor);
+				gl.drawArrays(gl.POINTS, 0, this.pointBuffer.numItems);
+		
+				gl.uniform1f(shaderProgram.roundPointsUniform, false);
+			}
 	
 		};
 	
@@ -147,7 +156,21 @@ define(
 			}
 	
 		}
-	
+
+		Pin.prototype.clearInnerGL = function(gl, shaderProgram){
+			gl.uniform1f(shaderProgram.roundPointsUniform, true);
+
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.pointBuffer);
+			gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, this.pointBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+			gl.uniform1f(shaderProgram.innerRadiusUniform, 0.0);
+
+			gl.uniform1f(shaderProgram.pointsizeUniform, this.id * gl.scaleFactor);
+			gl.drawArrays(gl.POINTS, 0, this.pointBuffer.numItems);
+
+			gl.uniform1f(shaderProgram.roundPointsUniform, false);
+		};
+
 		Pin.prototype.setup3DArrayBuffer = function(gl, x, y){
 	
 			var vBuffer;

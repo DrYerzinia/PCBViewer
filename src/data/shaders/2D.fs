@@ -7,6 +7,7 @@ uniform vec4 vColor;
 uniform float innerRadius;
 uniform float startAngle;
 uniform float sweep;
+uniform float shaveInside;
 
 uniform bool arcEnabled;
 uniform bool roundPoints;
@@ -20,6 +21,10 @@ void main(void) {
     		discard;
 
 		if(arcEnabled){
+
+			if(abs(gl_PointCoord.x - 0.5) < shaveInside || abs(gl_PointCoord.y - 0.5) < shaveInside)
+				discard;
+
 			float y_dif = gl_PointCoord.y - 0.5;
 			if(inverted)
 				y_dif = y_dif * -1.0;

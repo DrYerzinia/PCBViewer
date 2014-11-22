@@ -71,7 +71,7 @@ define(
 	
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.pointBuffer);
 			gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, this.pointBuffer.itemSize, gl.FLOAT, false, 0, 0);
-	
+
 			gl.uniform1f(shaderProgram.innerRadiusUniform, 0.0);
 	
 			gl.uniform4f(shaderProgram.vColorUniform, 0.59, 0.59, 0.59, 1.0);
@@ -86,20 +86,28 @@ define(
 	
 		}
 	
-		Via.prototype.clearGL = function(gl, shaderProgram){
+		Via.prototype.clearGL = function(gl, shaderProgram, layerNumber){
 	
-			gl.uniform1f(shaderProgram.roundPointsUniform, true);
-	
-			gl.bindBuffer(gl.ARRAY_BUFFER, this.pointBuffer);
-			gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, this.pointBuffer.itemSize, gl.FLOAT, false, 0, 0);
-	
-			gl.uniform1f(shaderProgram.innerRadiusUniform, 0.0);
-	
-			gl.uniform1f(shaderProgram.pointsizeUniform, (this.od + this.clearance) * gl.scaleFactor);
-			gl.drawArrays(gl.POINTS, 0, this.pointBuffer.numItems);
-	
-	
-			gl.uniform1f(shaderProgram.roundPointsUniform, false);
+			var thrm = this.flags.thermal;
+			if(thrm){
+				thrm = Thermal.findThermal(thrm, layerNumber);
+				if(thrm)
+					thrm.clearGL(gl, shaderProgram, this.pointBuffer, this.clearance, this.od, this.id);
+			}
+
+			if(!thrm){
+				gl.uniform1f(shaderProgram.roundPointsUniform, true);
+
+				gl.bindBuffer(gl.ARRAY_BUFFER, this.pointBuffer);
+				gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, this.pointBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+				gl.uniform1f(shaderProgram.innerRadiusUniform, 0.0);
+
+				gl.uniform1f(shaderProgram.pointsizeUniform, (this.od + this.clearance) * gl.scaleFactor);
+				gl.drawArrays(gl.POINTS, 0, this.pointBuffer.numItems);
+
+				gl.uniform1f(shaderProgram.roundPointsUniform, false);
+			}
 	
 		};
 	
@@ -113,7 +121,21 @@ define(
 			}
 	
 		}
-	
+
+		Via.prototype.clearInnerGL = function(gl, shaderProgram){
+			gl.uniform1f(shaderProgram.roundPointsUniform, true);
+
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.pointBuffer);
+			gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, this.pointBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+			gl.uniform1f(shaderProgram.innerRadiusUniform, 0.0);
+
+			gl.uniform1f(shaderProgram.pointsizeUniform, this.id * gl.scaleFactor);
+			gl.drawArrays(gl.POINTS, 0, this.pointBuffer.numItems);
+
+			gl.uniform1f(shaderProgram.roundPointsUniform, false);
+		};
+
 		Via.prototype.setup3DArrayBuffer = function(gl){
 	
 			var vBuffer;

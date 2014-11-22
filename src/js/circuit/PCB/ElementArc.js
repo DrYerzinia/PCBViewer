@@ -66,7 +66,7 @@ define(
 				gl.uniform1f(shaderProgram.invertedUniform, false);
 			gl.uniform1f(shaderProgram.startAngleUniform, (this.start / 180.0 * Math.PI) - Math.PI);
 			gl.uniform1f(shaderProgram.sweepUniform, (this.sweep / 180.0 * Math.PI));
-		
+
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.pointBuffer);
 			gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, this.pointBuffer.itemSize, gl.FLOAT, false, 0, 0);
 	
