@@ -18,7 +18,7 @@ define(
 
 		Class.extend(Renderer, TwoDRenderer);
 
-		TwoDRenderer.prototype._renderLayer = function(layer, color){
+		TwoDRenderer.prototype._renderLayer = function(layer, color, top){
 
 			var components = null;
 
@@ -33,7 +33,7 @@ define(
 				this.bufferCtx.clearRect(0, 0, this.bufferCanvas.width, this.bufferCanvas.height);
 				this.bufferCtx.restore();
 
-				layer.render(this.bufferCtx, color, this.pins, components);
+				layer.render(this.bufferCtx, color, this.pins, components, top);
 
 				this.ctx.drawImage(this.bufferCanvas, 0, 0);
 
@@ -89,23 +89,23 @@ define(
 			this.ctx.globalAlpha = 0.5;
 			if(side != Layer.TOP){
 
-	        	this._renderLayer(this.topSilk, '#FFFFFF', null);
-	        	this._renderLayer(this.solder, '#FFFFFF', null);
+	        	this._renderLayer(this.topSilk, '#FFFFFF', true);
+	        	this._renderLayer(this.solder, '#FFFFFF');
 	        	for(l = this.otherLayers.length - 1; l >= 0; l--)
-	        		this._renderLayer(this.otherLayers[l], null, null);
-	        	this._renderLayer(this.top, '#000000', null);
-	        	this._renderLayer(this.pins, null, null);
-	        	this._renderLayer(this.bottomSilk, '#000000', null);
+	        		this._renderLayer(this.otherLayers[l], null);
+	        	this._renderLayer(this.top, '#000000');
+	        	this._renderLayer(this.pins, null);
+	        	this._renderLayer(this.bottomSilk, '#000000');
 
 	        } else {
 
-	        	this._renderLayer(this.bottomSilk, '#FFFFFF', null);
-	        	this._renderLayer(this.top, '#FFFFFF', null);
+	        	this._renderLayer(this.bottomSilk, '#FFFFFF');
+	        	this._renderLayer(this.top, '#FFFFFF');
 	        	for(l = 0; l < this.otherLayers.length; l++)
-	        		this._renderLayer(this.otherLayers[l], null, null);
-	        	this._renderLayer(this.solder, '#000000', null);
-	        	this._renderLayer(this.pins, null, null);
-	        	this._renderLayer(this.topSilk, '#000000', null);
+	        		this._renderLayer(this.otherLayers[l], null);
+	        	this._renderLayer(this.solder, '#000000');
+	        	this._renderLayer(this.pins, null);
+	        	this._renderLayer(this.topSilk, '#000000', true);
 
 	        }
 		

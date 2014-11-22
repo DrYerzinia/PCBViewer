@@ -43,7 +43,7 @@ define(
 	
 		};
 	
-		Element.prototype.render = function(ctx, color, mirror,	pins_only) {
+		Element.prototype.render = function(ctx, color, top) {
 
 			var i, sym, rot = 0;
 	
@@ -70,10 +70,7 @@ define(
 		
 				ctx.save();
 				ctx.translate(this.tx, this.ty);
-		
-				if (mirror)
-					ctx.scale(1, -1);
-		
+				if(top) ctx.scale(1, -1);
 				ctx.rotate(rot);
 		
 				for (i = 0; i < this.refdes.length; i++) {
@@ -90,7 +87,7 @@ define(
 
 		Element.prototype.clear = function(ctx){};
 
-		Element.prototype.renderText = function(gl, shaderProgram){
+		Element.prototype.renderText = function(gl, shaderProgram, top){
 
 			var sym, rot, mvMatrix;
 
@@ -113,10 +110,7 @@ define(
 			glMatrix.mat4.set(gl.mvMatrix, mvMatrix);
 			glMatrix.mat4.translate(gl.mvMatrix, [this.mx, this.my, 0.0]);
 			glMatrix.mat4.translate(gl.mvMatrix, [this.tx, this.ty, 0.0]);
-
-			//if(mirror)
-			//	ctx.scale(1, -1);
-
+			if(top) glMatrix.mat4.scale(gl.mvMatrix, [1, -1, 1]);
 			glMatrix.mat4.rotateZ(gl.mvMatrix, rot)
 
 			gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, gl.mvMatrix);
@@ -136,10 +130,10 @@ define(
 
 		};
 
-		Element.prototype.renderGL = function(gl, shaderProgram){
+		Element.prototype.renderGL = function(gl, shaderProgram, top){
 
 			if(!this.flags.hidename)
-				this.renderText(gl, shaderProgram);
+				this.renderText(gl, shaderProgram, top);
 
 		};
 

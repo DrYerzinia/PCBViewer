@@ -129,17 +129,17 @@ define(
 
 		};
 
-		Layer.prototype.render = function(ctx, color, pins, elements){
+		Layer.prototype.render = function(ctx, color, pins, elements, top){
 
 			if(!color) color = this.pcbv.getLayerColors()[this.number-1];
 
 			if(this.hasPolygons()) this._renderPolygons(ctx, color, pins, elements);
 			for(var i = 0; i < this.parts.length; i++)
-				this.parts[i].render(ctx, color);
-			
+				this.parts[i].render(ctx, color, top);
+
 		};
 	
-		Layer.prototype.renderGL = function(gl, shaderProgram, color, pins, elements){
+		Layer.prototype.renderGL = function(gl, shaderProgram, color, pins, elements, top){
 	
 			gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
 
@@ -150,7 +150,7 @@ define(
 			if(this.hasPolygons()) this._renderPolygonsGL(gl, shaderProgram, color, pins, elements);
 			gl.uniform4f(shaderProgram.vColorUniform, color.r, color.g, color.b, 1.0);
 			for(var i = 0; i < this.parts.length; i++)
-				this.parts[i].renderGL(gl, shaderProgram);
+				this.parts[i].renderGL(gl, shaderProgram, top);
 
 		}
 	

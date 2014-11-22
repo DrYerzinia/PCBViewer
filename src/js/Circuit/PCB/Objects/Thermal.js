@@ -193,7 +193,7 @@ define(
 					Thermal._clearArc(gl, shaderProgram, pointBuffer, 0            , clearanceAngle, false, outerDiameter + clearance, outerDiameter, clearance);
 					Thermal._clearArc(gl, shaderProgram, pointBuffer, Math.PI * 0.5, clearanceAngle, false, outerDiameter + clearance, outerDiameter, clearance);
 					Thermal._clearArc(gl, shaderProgram, pointBuffer,-Math.PI * 0.5, clearanceAngle, false, outerDiameter + clearance, outerDiameter, clearance);
-					Thermal._clearArc(gl, shaderProgram, pointBuffer,-Math.PI     , clearanceAngle, false, outerDiameter + clearance, outerDiameter, clearance);
+					Thermal._clearArc(gl, shaderProgram, pointBuffer,-Math.PI      , clearanceAngle, false, outerDiameter + clearance, outerDiameter, clearance);
 					break;
 				case 'X':
 					var clearanceAngle = clearance / ((clearance / 2 + outerDiameter) / 2) / 2;

@@ -220,7 +220,7 @@ define(
 
 			if(side == Layer.TOP){
 
-				this.topSilk.renderGL(gl, this.shaderProgram, {r: 0.0, g: 0.0, b: 0.0}, this.pins, null);
+				this.topSilk.renderGL(gl, this.shaderProgram, {r: 0.0, g: 0.0, b: 0.0}, this.pins, null, true);
 				this.bottomSilk.renderGL(gl, this.shaderProgram, {r: 1.0, g: 1.0, b: 1.0}, this.pins, null);
 
 				this.top.renderGL(gl, this.shaderProgram, {r: 1.0, g: 1.0, b: 1.0}, this.pins, null);
@@ -228,7 +228,7 @@ define(
 
 			} else {
 
-				this.topSilk.renderGL(gl, this.shaderProgram, {r: 1.0, g: 1.0, b: 1.0}, this.pins, null);
+				this.topSilk.renderGL(gl, this.shaderProgram, {r: 1.0, g: 1.0, b: 1.0}, this.pins, null, true);
 				this.bottomSilk.renderGL(gl, this.shaderProgram,{r: 0.0, g: 0.0, b: 0.0}, this.pins, null);
 
 				this.top.renderGL(gl, this.shaderProgram, {r: 0.35, g: 0.35, b: 0.35}, this.pins, null);
