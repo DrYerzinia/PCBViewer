@@ -171,7 +171,8 @@ define(
 				this.layers[i].init3DArrays(gl);
 			for(i in this.symbols)
 				this.symbols[i].init3DArrays(this.ctx);
-		}
+
+		};
 
 		GLRenderer.prototype.resize = function(){
 
@@ -208,7 +209,9 @@ define(
 			glMatrix.mat4.scale(mvMatrix, [scaleFactor, scaleFactor, 1.0]);
 			glMatrix.mat4.translate(mvMatrix, [-offsetX, -offsetY, 0.0]);
 
+	        gl.disableVertexAttribArray(this.texShaderProgram.vertexPositionAttribute);
 	        gl.disableVertexAttribArray(this.texShaderProgram.textureCoordAttribute);
+	        gl.enableVertexAttribArray(this.shaderProgram.vertexPositionAttribute);
 	        gl.disable(gl.BLEND);
 
 	        gl.useProgram(this.shaderProgram);
@@ -275,6 +278,8 @@ define(
 			gl.uniformMatrix4fv(this.texShaderProgram.pMatrixUniform, false, oMatrix);
 	        gl.uniformMatrix4fv(this.texShaderProgram.mvMatrixUniform, false, mvMatrix);
 
+	        gl.disableVertexAttribArray(this.shaderProgram.vertexPositionAttribute);
+	        gl.enableVertexAttribArray(this.texShaderProgram.vertexPositionAttribute);
 	        gl.enableVertexAttribArray(this.texShaderProgram.textureCoordAttribute);
 
 	        gl.enable(gl.BLEND);
@@ -309,8 +314,7 @@ define(
 
 	        }
 
-
-		}
+		};
 
 		return GLRenderer;
 

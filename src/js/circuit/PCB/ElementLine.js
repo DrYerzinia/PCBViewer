@@ -55,6 +55,7 @@ define(function() {
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
 		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, this.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vertexBuffer.numItems);
 
 		gl.uniform1f(shaderProgram.innerRadiusUniform, 0.0);
@@ -98,6 +99,7 @@ define(function() {
 		oy2 = this.y2;
 
 		vBuffer = gl.createBuffer();
+
 		gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
 
 		var rise = oy2 - oy1;
@@ -158,6 +160,7 @@ define(function() {
 		this.vertexBuffer = this.generateLineBuffer(gl, this.thick);
 
 		vBuffer = gl.createBuffer();
+
 		gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([ox1,oy1,0.0,ox2,oy2,0.0]), gl.STATIC_DRAW);
 		vBuffer.itemSize = 3;
