@@ -7,10 +7,12 @@ uniform vec4 vColor;
 uniform float innerRadius;
 uniform float startAngle;
 uniform float sweep;
+uniform float shaveInside;
 
 uniform bool arcEnabled;
 uniform bool roundPoints;
 uniform bool inverted;
+uniform bool shaveFF;
 
 void main(void) {
 	if(roundPoints){
@@ -20,9 +22,22 @@ void main(void) {
     		discard;
 
 		if(arcEnabled){
+
+			float sx = gl_PointCoord.x - 0.5;
+			float sy = gl_PointCoord.y - 0.5;
+			if(shaveFF){
+				float sx2 = (sx + sy)/1.41421356237;
+				float sy2 = (sy - sx)/1.41421356237;
+				sx = sx2;
+				sy = sy2;
+			}
+			if(abs(sx) < shaveInside || abs(sy) < shaveInside)
+				discard;
+
 			float y_dif = gl_PointCoord.y - 0.5;
 			if(inverted)
 				y_dif = y_dif * -1.0;
+
 			float ang = atan(y_dif, gl_PointCoord.x - 0.5);
 			if(startAngle + sweep > M_PI){
 				if(ang < startAngle && ang > startAngle + sweep - M_PI * 2.0)

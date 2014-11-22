@@ -48,14 +48,24 @@ define(
 						elements.parts[i].clear(ctx);
 				if(pins)
 					for(i = 0; i < pins.parts.length; i++)
-						pins.parts[i].clear(ctx);
+						pins.parts[i].clear(ctx, this.number);
 				ctx.globalCompositeOperation = "source-over";
+
 			}
 
 			// Render non clearing polygons
 			for(i = 0; i < this.polygons.length; i++)
 				if(!this.polygons[i].isClear())
 					this.polygons[i].render(ctx, color);
+
+			// Clear centers
+			ctx.globalCompositeOperation = "destination-out";
+			ctx.strokeStyle = 'rgba(0,0,0,1)';
+			ctx.fillStyle = 'rgba(0,0,0,1)';
+			if(pins)
+				for(i = 0; i < pins.parts.length; i++)
+					pins.parts[i].clearInner(ctx);
+			ctx.globalCompositeOperation = "source-over";
 
 		}
 
@@ -77,12 +87,12 @@ define(
 				gl.uniform4f(shaderProgram.vColorUniform, 0.0, 0.0, 0.0, 0.0);
 				for(i = 0; i < this.parts.length; i++)
 					this.parts[i].clearGL(gl, shaderProgram);
-				if(pins)
-					for(i = 0; i < pins.parts.length; i++)
-						pins.parts[i].clearGL(gl, shaderProgram);
 				if(elements)
 					for(i = 0; i < elements.parts.length; i++)
 						elements.parts[i].clearGL(gl, shaderProgram);
+				if(pins)
+					for(i = 0; i < pins.parts.length; i++)
+						pins.parts[i].clearGL(gl, shaderProgram, this.number);
 			}
 
 			// render non clear polygons
@@ -90,6 +100,12 @@ define(
 			for(i = 0; i < this.polygons.length; i++)
 				if(!this.polygons[i].isClear())
 					this.polygons[i].renderGL(gl, shaderProgram);
+
+			// Clear centers
+			gl.uniform4f(shaderProgram.vColorUniform, 0.0, 0.0, 0.0, 0.0);
+			if(pins)
+				for(i = 0; i < pins.parts.length; i++)
+					pins.parts[i].clearInnerGL(gl, shaderProgram);
 
 		}
 
