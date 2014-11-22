@@ -77,7 +77,7 @@ define(
 			if(thrm){
 				thrm = Thermal.findThermal(thrm, layerNumber);
 				if(thrm)
-					thrm.clear(ctx, this.pointBuffer, this.clearance, this.thick, this.drill);
+					thrm.clear(ctx, this._cache.x, this._cache.y, this.clearance, this.thick, this.drill);
 			}
 
 			if(!thrm){
