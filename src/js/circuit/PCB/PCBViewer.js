@@ -21,7 +21,9 @@ define(
 	 	"./Polygon",
 	 	"./Symbol",
 	 	"./Renderers/TwoDRenderer",
-	 	"./Renderers/GLRenderer"
+	 	"./Renderers/GLRenderer",
+	 	"Util/DOM",
+	 	"Util/Touch/Touch"
 	],
 	function(
 		Line,
@@ -36,7 +38,9 @@ define(
 		Polygon,
 		Symbol,
 		TwoDRenderer,
-		GLRenderer
+		GLRenderer,
+		DOM,
+		Touch
 	){
 
 		function PCBV(canvas, attach, mode) {
@@ -95,6 +99,11 @@ define(
 			this.canvas.onmousedown = null;
 			this.canvas.onkeydown = null;
 			this.canvas.onmousemove = null;
+			this.canvas.ontouchstart = null;
+			this.canvas.ontouchmove = null;
+			this.canvas.ontouchend = null;
+			this.canvas.ontouchcancel = null;
+			this.canvas.ontouchleave = null;
 
 		};
 
@@ -182,7 +191,11 @@ define(
 				t.mouseY = e.pageY;
 			};}(this);
 			this.mouseWheelFunction = function(t){return function(e){t._wheel(e);};}(this);
-
+			this.onTouchStartFunction = function(t){return function(e){t._touchStart(e);};}(this);
+			this.onTouchMoveFunction = function(t){return function(e){t._touchMove(e);};}(this);
+			this.onTouchEndFunction = function(t){return function(e){t._touchEnd(e);};}(this);
+			this.onTouchCancelFunction = function(t){return function(e){e.preventDefault();};}(this);
+			
 			if(window.addEventListener){
 				document.addEventListener("mouseup", this.mouseUpFunction, false);
 				this.canvas.addEventListener("mousewheel", this.mouseWheelFunction, false);
@@ -194,21 +207,125 @@ define(
 			this.canvas.onmousedown = this.mouseDownFunction;
 			this.canvas.onkeydown = this.keyDownFunction;
 			this.canvas.onmousemove = this.mouseMoveFunction;
+			this.canvas.ontouchstart = this.onTouchStartFunction;
+			this.canvas.ontouchmove = this.onTouchMoveFunction;
+			this.canvas.ontouchend = this.onTouchEndFunction;
+			this.canvas.ontouchcancel = this.onTouchCancelFunction;
+			this.canvas.ontouchleave = this.onTouchEndFunction;
+
+			this.touches = [];
 
 		}
+
+		PCBV.prototype._touchStart = function(e){
+
+			e.preventDefault();
+			var tch = e.changedTouches;
+
+			for(var i = 0; i < tch.length; i++){
+				this.touches.push(Touch.from_touch(tch[i]));
+			}
+
+			if(this.touches.length == 1){
+
+				this.mouse_down_x = this.touches[0].x;
+				this.mouse_down_y = this.touches[0].y;
+
+				this.touch_clicking = true;
+
+			}
+
+			// If 2 fingers we are zooming in/out
+			else if(this.touches.length == 2){
+
+				this.scale_distance_last = Math.sqrt( Math.pow(this.touches[0].x - this.touches[1].x, 2) + Math.pow(this.touches[0].y - this.touches[1].y, 2) );
+				this.scale_delta = 0;
+
+				this.touch_clicking = false;
+
+			}
+
+		};
+
+		PCBV.prototype._touchMove = function(e){
+
+			e.preventDefault();
+			var tch = e.changedTouches;
+
+			// If 1 finger we are dragging
+			if(this.touches.length == 1){
+
+				var ot = this.touches[0];
+					nt = Touch.from_touch(tch[0]),
+					dx = ot.x - nt.x,
+					dy = ot.y - nt.y;
+
+				this._updateMouseDrag(dx, dy);
+
+			}
+
+			// update the touches
+			for(var i = 0; i < tch.length; i++){
+				for(var j = 0; j < this.touches.length; j++){
+					if(this.touches[j].id == tch[i].identifier){
+						this.touches[j].x = tch[i].pageX;
+						this.touches[j].y = tch[i].pageY;
+						break;
+					}
+				}
+			}
+
+			// If 2 fingers we are zooming in/out
+			if(this.touches.length == 2){
+
+				var touch_distance = Math.sqrt( Math.pow(this.touches[0].x - this.touches[1].x, 2) + Math.pow(this.touches[0].y - this.touches[1].y, 2) );
+
+				var center = {x: 0, y: 0};
+				center.x = (this.touches[0].x + this.touches[1].x)/2;
+				center.y = (this.touches[0].y + this.touches[1].y)/2;
+
+				var off = DOM.offset(this.canvas),
+					px = center.x - off.x,
+					py = center.y - off.y;
+
+				// Set partial scale
+				var change = this.scale_distance_last - touch_distance;
+				var scaled = Math.floor(change/40);
+				if(scaled != this.scale_delta){
+
+					if(scaled > this.scale_delta){
+						this._updateMouseScroll(px, py, -1);
+					} else {
+						this._updateMouseScroll(px, py, 1);
+					}
+					this.scale_delta = scaled;
+				}
+			}
+
+		};
+		PCBV.prototype._touchEnd = function(e){
+
+			e.preventDefault();
+
+			var tch = e.changedTouches;
+
+			// remove the touch
+			for(var i = 0; i < tch.length; i++){
+				for(var j = 0; j < this.touches.length; j++){
+					if(this.touches[j].id == tch[i].identifier){
+						this.touches.splice(j, 1);
+							break;
+					}
+				}
+			}
+
+		};
 
 		PCBV.prototype._wheel = function(e) {
 			
 			var	ev = window.event || e,
 				d,
-				elem = this.canvas,
-				doc = elem && elem.ownerDocument,
-				docElem = doc.documentElement,
-				box = elem.getBoundingClientRect(),
-				off = {
-					top: box.top  + (window.pageYOffset || docElem.scrollTop)  - (docElem.clientTop  || 0),
-					left: box.left + (window.pageXOffset || docElem.scrollLeft) - (docElem.clientLeft || 0)
-				};
+				off = DOM.offset(this.canvas);
 	
 			if(ev.stopPropagation) ev.stopPropagation();
 			if(ev.preventDefault) ev.preventDefault();
@@ -216,7 +333,7 @@ define(
 	
 			d = Math.max(-1, Math.min(1, (ev.wheelDelta || -ev.detail)));
 	
-			this._updateMouseScroll(this.mouseX - off.left, this.mouseY - off.top, d);
+			this._updateMouseScroll(this.mouseX - off.x, this.mouseY - off.y, d);
 	
 		};
 	
@@ -274,10 +391,10 @@ define(
 
 			var dx, dy, min;
 
-				min = Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale;
+			min = Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale;
 
-				dy = y / min;
-	            dx = x / min;
+			dy = y / min;
+            dx = x / min;
 
 			if(this.side) this.offset.y -= dy;
 			else this.offset.y += dy;
