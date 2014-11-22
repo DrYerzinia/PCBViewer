@@ -1,4 +1,5 @@
 #define M_PI 3.1415926535897932384626433832795
+#define M_SQRT_2 1.41421356237
 
 precision mediump float;
 
@@ -26,8 +27,8 @@ void main(void) {
 			float sx = gl_PointCoord.x - 0.5;
 			float sy = gl_PointCoord.y - 0.5;
 			if(shaveFF){
-				float sx2 = (sx + sy)/1.41421356237;
-				float sy2 = (sy - sx)/1.41421356237;
+				float sx2 = (sx + sy)/M_SQRT_2;
+				float sy2 = (sy - sx)/M_SQRT_2;
 				sx = sx2;
 				sy = sy2;
 			}

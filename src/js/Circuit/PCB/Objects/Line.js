@@ -61,7 +61,7 @@ define(
 
 		};
 
-		Line.prototype.setup3DArrayBuffer = function(gl, x, y){
+		Line.prototype.setupGL = function(gl, x, y){
 
 			var vBuffer, ox1, oy1, ox2, oy2;
 

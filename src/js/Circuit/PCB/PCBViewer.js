@@ -9,26 +9,27 @@
 
 define(
 	[
-	 	"./Line",
-	 	"./Text",
 	 	"./Layer",
-	 	"./Via",
-	 	"./Pin",
-	 	"./Pad",
-	 	"./Element",
-	 	"./ElementLine",
-	 	"./ElementArc",
-	 	"./Polygon",
-	 	"./Symbol",
+	 	"./Objects/Line",
+	 	"./Objects/Text",
+	 	"./Objects/Via",
+	 	"./Objects/Pin",
+	 	"./Objects/Pad",
+	 	"./Objects/Element",
+	 	"./Objects/ElementLine",
+	 	"./Objects/ElementArc",
+	 	"./Objects/Polygon",
+	 	"./Objects/Symbol",
 	 	"./Renderers/TwoDRenderer",
 	 	"./Renderers/GLRenderer",
+	 	"Graphics/GLHelper",
 	 	"Util/DOM",
 	 	"Util/Touch/Touch"
 	],
 	function(
+		Layer,
 		Line,
 		Text,
-		Layer,
 		Via,
 		Pin,
 		Pad,
@@ -39,6 +40,7 @@ define(
 		Symbol,
 		TwoDRenderer,
 		GLRenderer,
+		GLHelper,
 		DOM,
 		Touch
 	){
@@ -60,7 +62,7 @@ define(
 				if(mode == "Normal")
 					this.ctx = false;
 				else
-					this.ctx = PCBV._getWebGL(canvas);
+					this.ctx = GLHelper.getWebGL(canvas);
 
 				if(this.ctx == false){
 
@@ -111,27 +113,6 @@ define(
 		PCBV._defaultLayerColors = ['#8B2323', '#3A5FCD', '#104E8B', '#CD3700',
 				'#548B54', '#8B7355', '#00868B', '#228B22',
 				'#000000', '#000000'];
-
-		PCBV._getWebGL = function(canvas){
-
-			var names, context, i;
-
-			if(!!window.WebGLRenderingContext) {
-				names = ["webgl", "experimental-webgl", "moz-webgl", "webkit-3d"];
-				context = false;
-
-				for(var i=0; i < names.length ;i++){
-					try {
-						context = canvas.getContext(names[i]);
-						if(context && typeof context.getParameter == "function"){
-							return context;
-						}
-					} catch(e) {}
-				}
-				return false;
-			}
-			return false;
-		}
 
 		PCBV.prototype._buildLayers = function(){
 

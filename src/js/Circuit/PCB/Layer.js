@@ -1,6 +1,6 @@
 define(
 	[
-	 	"./Polygon"
+	 	"./Objects/Polygon"
 	],
 	function(
 		Polygon
@@ -166,13 +166,15 @@ define(
 	
 		}
 	
-		Layer.prototype.init3DArrays = function(gl){
-	
+		Layer.prototype.setupGL = function(gl){
+
 			var i;
+
+			this.setupFramebuffer(gl);
 			for(i = 0; i < this.parts.length; i++)
-				this.parts[i].setup3DArrayBuffer(gl, 0, 0);
+				this.parts[i].setupGL(gl, 0, 0);
 			for(i = 0; i < this.polygons.length; i++)
-				this.polygons[i].setup3DArrayBuffer(gl, 0, 0);
+				this.polygons[i].setupGL(gl, 0, 0);
 
 		}
 	

@@ -1,6 +1,6 @@
 define(
 	[
-	 	"./Thermal"
+	 	"./Objects/Thermal"
 	],
 	function(
 		Thermal

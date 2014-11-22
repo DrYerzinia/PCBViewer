@@ -1,7 +1,7 @@
 define(
 	[
 	 	"./Thermal",
-	 	"./parseFlags"
+	 	"../parseFlags"
 	],
 	function(
 		Thermal,
@@ -112,14 +112,14 @@ define(
 		};
 	
 		Via.prototype.cleanupGL = function(gl){
-	
+
 			if(this.pointBuffer){
 				gl.bindBuffer(gl.ARRAY_BUFFER, this.pointBuffer);
 				gl.bufferData(gl.ARRAY_BUFFER, 1, gl.STATIC_DRAW);
 				gl.deleteBuffer(this.pointBuffer);
 				this.pointBuffer = null;
 			}
-	
+
 		}
 
 		Via.prototype.clearInnerGL = function(gl, shaderProgram){
@@ -136,8 +136,8 @@ define(
 			gl.uniform1f(shaderProgram.roundPointsUniform, false);
 		};
 
-		Via.prototype.setup3DArrayBuffer = function(gl){
-	
+		Via.prototype.setupGL = function(gl){
+
 			var vBuffer;
 			vBuffer = gl.createBuffer();
 			gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
@@ -145,8 +145,8 @@ define(
 			vBuffer.itemSize = 3;
 			vBuffer.numItems = 1;
 			this.pointBuffer = vBuffer;
-	
-		}
+
+		};
 	
 		return Via;
 

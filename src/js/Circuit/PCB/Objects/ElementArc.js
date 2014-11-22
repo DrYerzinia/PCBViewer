@@ -1,6 +1,6 @@
 define(
 	[
-	 	'./Layer'
+	 	'../Layer'
 	],
 	function(
 		Layer
@@ -79,7 +79,7 @@ define(
 			gl.uniform1f(shaderProgram.arcEnabledUniform, false);
 			gl.uniform1f(shaderProgram.roundPointsUniform, false);
 	
-		}
+		};
 
 		ElementArc.prototype.clearGL = function(gl, shaderProgram){};
 
@@ -92,9 +92,9 @@ define(
 				this.pointBuffer = null;
 			}
 
-		}
+		};
 
-		ElementArc.prototype.setup3DArrayBuffer = function(gl, x, y){
+		ElementArc.prototype.setupGL = function(gl, x, y){
 	
 			var vBuffer;
 			vBuffer = gl.createBuffer();
@@ -105,7 +105,7 @@ define(
 			this.pointBuffer = vBuffer;
 	
 	
-		}
+		};
 	
 		return ElementArc;
 

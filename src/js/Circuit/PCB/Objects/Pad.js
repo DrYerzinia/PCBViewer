@@ -129,9 +129,9 @@ define(function() {
 
 		return vBuffer;
 
-	}
+	};
 
-	Pad.prototype.setup3DArrayBuffer = function(gl, x, y){
+	Pad.prototype.setupGL = function(gl, x, y){
 
 		this.vertexBuffer = this.generatePadBuffer(gl, this.thick);
 		this.clearBuffer = this.generatePadBuffer(gl, this.thick + this.clearance);

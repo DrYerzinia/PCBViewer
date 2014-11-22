@@ -86,11 +86,9 @@ define(
 
 		Text.prototype.clearGL = function(gl, shaderProgram){};
 	
-		Text.prototype.cleanupGL = function(gl){}
+		Text.prototype.cleanupGL = function(gl){};
 
-		Text.prototype.setup3DArrayBuffer = function(gl, x, y){
-			//
-		}
+		Text.prototype.setupGL = function(gl, x, y){};
 		
 		return Text;
 

@@ -134,18 +134,14 @@ define(
 			glMatrix.mat4.set(mvMatrix, gl.mvMatrix);
 	        gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
 
-		}
+		};
 
 		Element.prototype.renderGL = function(gl, shaderProgram){
 
 			if(!this.flags.hidename)
 				this.renderText(gl, shaderProgram);
 
-			//var i;
-			//for(i = 0; i < this.parts.length; i++)
-				//this.parts[i].renderGL(gl, shaderProgram);
-
-		}
+		};
 
 		Element.prototype.clearGL = function(gl, shaderProgram){};
 
@@ -155,15 +151,9 @@ define(
 			for(i = 0; i < this.parts.length; i++)
 				this.parts[i].cleanupGL(gl);
 
-		}
+		};
 
-		Element.prototype.setup3DArrayBuffer = function(gl, x, y){
-	
-			//var i;
-			//for(i = 0; i < this.parts.length; i++)
-			//	this.parts[i].setup3DArrayBuffer(gl, this.mx, this.my);
-	
-		}
+		Element.prototype.setupGL = function(gl, x, y){};
 	
 		return Element;
 

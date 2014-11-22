@@ -27,12 +27,12 @@ define(function() {
 		for(var l = 0; l < this.lines.length; l++)
 			this.lines[l].cleanupGL(gl);
 
-	}
+	};
 
-	Symbol.prototype.init3DArrays = function(gl){
+	Symbol.prototype.setupGL = function(gl){
 
 		for(var l = 0; l < this.lines.length; l++)
-			this.lines[l].setup3DArrayBuffer(gl);
+			this.lines[l].setupGL(gl);
 
 	};
 

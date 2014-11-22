@@ -112,11 +112,16 @@ define(
 
 		Polygon.prototype.cleanupGL = function(gl){
 
-			//
+			if(this.pointBuffer){
+				gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+				gl.bufferData(gl.ARRAY_BUFFER, 1, gl.STATIC_DRAW);
+				gl.deleteBuffer(this.vertexBuffer);
+				this.pointBuffer = null;
+			}
 
 		};
 
-		Polygon.prototype.setup3DArrayBuffer = function(gl, x, y){
+		Polygon.prototype.setupGL = function(gl, x, y){
 
 			var vBuffer, vertices = [], i;
 

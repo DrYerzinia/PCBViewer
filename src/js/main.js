@@ -7,7 +7,7 @@ requirejs.config({
 
 });
 
-require(['circuit/PCB/PCBViewer'], function(PCBV){
+require(['Circuit/PCB/PCBViewer'], function(PCBV){
 
 	var PCBListSelect, PCBListReq, PCBCanvasContainer, status;
 

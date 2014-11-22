@@ -3,6 +3,27 @@ define(
 	
 		var GLHelper = {};
 
+		GLHelper.getWebGL = function(canvas){
+
+			var names, context, i;
+
+			if(!!window.WebGLRenderingContext) {
+				names = ["webgl", "experimental-webgl", "moz-webgl", "webkit-3d"];
+				context = false;
+
+				for(var i=0; i < names.length ;i++){
+					try {
+						context = canvas.getContext(names[i]);
+						if(context && typeof context.getParameter == "function"){
+							return context;
+						}
+					} catch(e) {}
+				}
+				return false;
+			}
+			return false;
+		};
+
 		GLHelper.createShader = function(gl, type, shaderText){
 
 			var shader;
@@ -18,7 +39,7 @@ define(
 
 			return shader;
 
-		}
+		};
 
 		GLHelper.createProgram = function(gl, vertexShader, fragmentShader){
 
@@ -35,7 +56,7 @@ define(
 
 			return program;
 
-		}
+		};
 
 		return GLHelper;
 

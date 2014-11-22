@@ -165,14 +165,11 @@ define(
 	        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
 		    // Set-Up Frame Buffers
-			for(i = 0; i < this.layers.length; i++)
-				this.layers[i].setupFramebuffer(gl);
-
 			// Set-Up 3D Buffer Arrays
 			for(i = 0; i < this.layers.length; i++)
-				this.layers[i].init3DArrays(gl);
+				this.layers[i].setupGL(gl);
 			for(i in this.symbols)
-				this.symbols[i].init3DArrays(this.ctx);
+				this.symbols[i].setupGL(this.ctx);
 
 		};
 

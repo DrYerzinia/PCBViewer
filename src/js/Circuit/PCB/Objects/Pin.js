@@ -1,7 +1,7 @@
 define(
 	[
 	 	"./Thermal",
-	 	"./parseFlags"
+	 	"../parseFlags"
 	],
 	function(
 		Thermal,
@@ -40,7 +40,7 @@ define(
 			this._cache.rx = this._cache.x - (this.thick / 2);
 			this._cache.ry = this._cache.y - (this.thick / 2);
 	
-		}
+		};
 	
 		Pin.prototype.render = function(ctx, color) {
 	
@@ -119,8 +119,8 @@ define(
 			gl.drawArrays(gl.POINTS, 0, this.pointBuffer.numItems);
 	
 			gl.uniform1f(shaderProgram.roundPointsUniform, false);
-	
-		}
+
+		};
 	
 		Pin.prototype.clearGL = function(gl, shaderProgram, layerNumber){
 	
@@ -157,7 +157,7 @@ define(
 				this.pointBuffer = null;
 			}
 	
-		}
+		};
 
 		Pin.prototype.clearInnerGL = function(gl, shaderProgram){
 			gl.uniform1f(shaderProgram.roundPointsUniform, true);
@@ -173,7 +173,7 @@ define(
 			gl.uniform1f(shaderProgram.roundPointsUniform, false);
 		};
 
-		Pin.prototype.setup3DArrayBuffer = function(gl, x, y){
+		Pin.prototype.setupGL = function(gl, x, y){
 	
 			var vBuffer;
 			vBuffer = gl.createBuffer();
@@ -183,7 +183,7 @@ define(
 			vBuffer.numItems = 1;
 			this.pointBuffer = vBuffer;
 	
-		}
+		};
 	
 		return Pin;
 
