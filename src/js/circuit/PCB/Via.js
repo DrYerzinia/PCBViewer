@@ -92,7 +92,7 @@ define(
 			if(thrm){
 				thrm = Thermal.findThermal(thrm, layerNumber);
 				if(thrm)
-					thrm.clearGL(gl, shaderProgram, this.pointBuffer, this.clearance, this.od, this.id);
+					thrm.clearGL(gl, shaderProgram, this.x, this.y, this.pointBuffer, this.clearance, this.od, this.id);
 			}
 
 			if(!thrm){

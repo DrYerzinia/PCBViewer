@@ -91,6 +91,7 @@ define(
 	        this.shaderProgram.arcEnabledUniform = gl.getUniformLocation(this.shaderProgram, "arcEnabled");
 	        this.shaderProgram.invertedUniform = gl.getUniformLocation(this.shaderProgram, "inverted");
 	        this.shaderProgram.shaveInsideUniform = gl.getUniformLocation(this.shaderProgram, "shaveInside");
+	        this.shaderProgram.shaveFFUniform = gl.getUniformLocation(this.shaderProgram, "shaveFF");
 
 	        // Texture Shader
 			this.texShaderProgram = GLHelper.createProgram(gl, 

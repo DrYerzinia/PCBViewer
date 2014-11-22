@@ -124,11 +124,13 @@ define(
 	
 		Pin.prototype.clearGL = function(gl, shaderProgram, layerNumber){
 	
+			if(!this._cache) this._createCache();
+
 			var thrm = this.flags.thermal;
 			if(thrm){
 				thrm = Thermal.findThermal(thrm, layerNumber);
 				if(thrm)
-					thrm.clearGL(gl, shaderProgram, this.pointBuffer, this.clearance, this.thick, this.drill);
+					thrm.clearGL(gl, shaderProgram, this._cache.x, this._cache.y, this.pointBuffer, this.clearance, this.thick, this.drill);
 			}
 
 			if(!thrm){
