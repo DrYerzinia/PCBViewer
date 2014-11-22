@@ -24,7 +24,7 @@ define(
 	 	"./Renderers/GLRenderer",
 	 	"Graphics/GLHelper",
 	 	"Util/DOM",
-	 	"Util/Touch/Touch"
+	 	"Util/Touch/BasicTouchHandler"
 	],
 	function(
 		Layer,
@@ -42,7 +42,7 @@ define(
 		GLRenderer,
 		GLHelper,
 		DOM,
-		Touch
+		BasicTouchHandler
 	){
 
 		function PCBV(canvas, attach, mode) {
@@ -101,11 +101,6 @@ define(
 			this.canvas.onmousedown = null;
 			this.canvas.onkeydown = null;
 			this.canvas.onmousemove = null;
-			this.canvas.ontouchstart = null;
-			this.canvas.ontouchmove = null;
-			this.canvas.ontouchend = null;
-			this.canvas.ontouchcancel = null;
-			this.canvas.ontouchleave = null;
 
 		};
 
@@ -172,10 +167,6 @@ define(
 				t.mouseY = e.pageY;
 			};}(this);
 			this.mouseWheelFunction = function(t){return function(e){t._wheel(e);};}(this);
-			this.onTouchStartFunction = function(t){return function(e){t._touchStart(e);};}(this);
-			this.onTouchMoveFunction = function(t){return function(e){t._touchMove(e);};}(this);
-			this.onTouchEndFunction = function(t){return function(e){t._touchEnd(e);};}(this);
-			this.onTouchCancelFunction = function(t){return function(e){e.preventDefault();};}(this);
 			
 			if(window.addEventListener){
 				document.addEventListener("mouseup", this.mouseUpFunction, false);
@@ -188,119 +179,18 @@ define(
 			this.canvas.onmousedown = this.mouseDownFunction;
 			this.canvas.onkeydown = this.keyDownFunction;
 			this.canvas.onmousemove = this.mouseMoveFunction;
-			this.canvas.ontouchstart = this.onTouchStartFunction;
-			this.canvas.ontouchmove = this.onTouchMoveFunction;
-			this.canvas.ontouchend = this.onTouchEndFunction;
-			this.canvas.ontouchcancel = this.onTouchCancelFunction;
-			this.canvas.ontouchleave = this.onTouchEndFunction;
 
-			this.touches = [];
+			this.touchHandler =
+				new BasicTouchHandler(
+					this.canvas,
+					function(t){return function(x, y, s){t._updateMouseScroll(x, y, s)};}(this),
+					40,
+					function(t){return function(x, y){t._updateMouseDrag(x, y);};}(this),
+					null,
+					function(t){return function(x, y){t._flip();t.render();};}(this)
+				);
 
 		}
-
-		PCBV.prototype._touchStart = function(e){
-
-			e.preventDefault();
-			var tch = e.changedTouches;
-
-			for(var i = 0; i < tch.length; i++){
-				this.touches.push(Touch.from_touch(tch[i]));
-			}
-
-			if(this.touches.length == 1){
-
-				this.mouse_down_x = this.touches[0].x;
-				this.mouse_down_y = this.touches[0].y;
-
-				this.touch_clicking = true;
-
-			}
-
-			// If 2 fingers we are zooming in/out
-			else if(this.touches.length == 2){
-
-				this.scale_distance_last = Math.sqrt( Math.pow(this.touches[0].x - this.touches[1].x, 2) + Math.pow(this.touches[0].y - this.touches[1].y, 2) );
-				this.scale_delta = 0;
-
-				this.touch_clicking = false;
-
-			}
-
-		};
-
-		PCBV.prototype._touchMove = function(e){
-
-			e.preventDefault();
-			var tch = e.changedTouches;
-
-			// If 1 finger we are dragging
-			if(this.touches.length == 1){
-
-				var ot = this.touches[0];
-					nt = Touch.from_touch(tch[0]),
-					dx = ot.x - nt.x,
-					dy = ot.y - nt.y;
-
-				this._updateMouseDrag(dx, dy);
-
-			}
-
-			// update the touches
-			for(var i = 0; i < tch.length; i++){
-				for(var j = 0; j < this.touches.length; j++){
-					if(this.touches[j].id == tch[i].identifier){
-						this.touches[j].x = tch[i].pageX;
-						this.touches[j].y = tch[i].pageY;
-						break;
-					}
-				}
-			}
-
-			// If 2 fingers we are zooming in/out
-			if(this.touches.length == 2){
-
-				var touch_distance = Math.sqrt( Math.pow(this.touches[0].x - this.touches[1].x, 2) + Math.pow(this.touches[0].y - this.touches[1].y, 2) );
-
-				var center = {x: 0, y: 0};
-				center.x = (this.touches[0].x + this.touches[1].x)/2;
-				center.y = (this.touches[0].y + this.touches[1].y)/2;
-
-				var off = DOM.offset(this.canvas),
-					px = center.x - off.x,
-					py = center.y - off.y;
-
-				// Set partial scale
-				var change = this.scale_distance_last - touch_distance;
-				var scaled = Math.floor(change/40);
-				if(scaled != this.scale_delta){
-
-					if(scaled > this.scale_delta){
-						this._updateMouseScroll(px, py, -1);
-					} else {
-						this._updateMouseScroll(px, py, 1);
-					}
-					this.scale_delta = scaled;
-				}
-			}
-
-		};
-		PCBV.prototype._touchEnd = function(e){
-
-			e.preventDefault();
-
-			var tch = e.changedTouches;
-
-			// remove the touch
-			for(var i = 0; i < tch.length; i++){
-				for(var j = 0; j < this.touches.length; j++){
-					if(this.touches[j].id == tch[i].identifier){
-						this.touches.splice(j, 1);
-							break;
-					}
-				}
-			}
-
-		};
 
 		PCBV.prototype._wheel = function(e) {
 			
@@ -317,7 +207,12 @@ define(
 			this._updateMouseScroll(this.mouseX - off.x, this.mouseY - off.y, d);
 	
 		};
-	
+
+		PCBV.prototype._flip = function(){
+			if(this.side == Layer.TOP) this.side = Layer.SOLDER;
+			else this.side = Layer.TOP;
+		};
+
 		// Key event handler
 		PCBV.prototype._updateKey = function(e){
 	
@@ -341,7 +236,7 @@ define(
 					else this.offset.y -= this.height/shift;
 					break;
 				case 65: // Flip side
-					this.side = !this.side;
+					this._flip();
 					break;
 				case 90: // Z : Zoom in
 					this.offset.y += ((this.canvas.height-(this.canvas.height/1.1))/2)/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
