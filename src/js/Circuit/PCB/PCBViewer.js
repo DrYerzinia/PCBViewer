@@ -75,8 +75,8 @@ define(
 
 				}
 
-				this.last_time = 0;
-				this.end_time = 0;
+				this.lastTime = 0;
+				this.endTime = 0;
 		
 				this._setupEventHandlers();
 
@@ -101,6 +101,8 @@ define(
 			this.canvas.onmousedown = null;
 			this.canvas.onkeydown = null;
 			this.canvas.onmousemove = null;
+
+			this.touchHandler.destroy();
 
 		};
 
@@ -310,7 +312,7 @@ define(
 
 			this.renderer.render(this.side, this.offset.x, this.offset.y, scalef);
 
-			this.end_time = (new Date()).getTime();
+			this.endTime = (new Date()).getTime();
 
 		};
 
@@ -543,12 +545,12 @@ define(
 
 		PCBV.prototype.render = function(force, timeout){
 		
-			var scalef, i, cur_time = (new Date()).getTime(), t = this, gl;
+			var scalef, i, curTime = (new Date()).getTime(), t = this, gl;
 		
 			// Limit refresh rate to 30 FPS, wait 10 millis for screen refresh
 			// Also, only renders when somethings changed, i.e. Drag/Zoom
-			if((Math.abs(cur_time-this.last_time) > 33 && Math.abs(cur_time-this.end_time) > 11) || force){
-				this.last_time = cur_time;
+			if((Math.abs(curTime-this.lastTime) > 33 && Math.abs(curTime-this.endTime) > 11) || force){
+				this.lastTime = curTime;
 			} else { // incase last render call from event was ignored
 				if(!timeout) setTimeout(function(){t.render(false, true);}, 50);
 				return;		

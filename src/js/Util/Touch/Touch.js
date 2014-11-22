@@ -47,7 +47,7 @@ define(
 		 * @param {touch} touch A Browser Native touch boject
 		 * @return A new touch object contstructed from a browser native touch object
 		 */
-		Touch.from_touch = function(touch){
+		Touch.fromTouch = function(touch){
 
 			return new Touch(touch.identifier, touch.pageX, touch.pageY);
 

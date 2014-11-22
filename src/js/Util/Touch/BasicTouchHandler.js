@@ -53,7 +53,7 @@ define(
 			var tch = e.changedTouches;
 
 			for(var i = 0; i < tch.length; i++){
-				this.touches.push(Touch.from_touch(tch[i]));
+				this.touches.push(Touch.fromTouch(tch[i]));
 			}
 
 			if(this.touches.length == 1){
@@ -68,8 +68,8 @@ define(
 			// If 2 fingers we are zooming in/out
 			else if(this.touches.length == 2){
 
-				this.scale_distance_last = Math.sqrt( Math.pow(this.touches[0].x - this.touches[1].x, 2) + Math.pow(this.touches[0].y - this.touches[1].y, 2) );
-				this.scale_delta = 0;
+				this.scaleDistanceLast = Math.sqrt( Math.pow(this.touches[0].x - this.touches[1].x, 2) + Math.pow(this.touches[0].y - this.touches[1].y, 2) );
+				this.scaleDelta = 0;
 
 				this.touchClicking = false;
 
@@ -86,7 +86,7 @@ define(
 			if(this.touches.length == 1){
 
 				var ot = this.touches[0];
-					nt = Touch.from_touch(tch[0]),
+					nt = Touch.fromTouch(tch[0]),
 					dx = ot.x - nt.x,
 					dy = ot.y - nt.y;
 
@@ -133,7 +133,7 @@ define(
 				var scaled = Math.floor(change/this.scaleStep);
 				if(scaled != this.scaleDelta){
 
-					if(scaled > this.scale_delta){
+					if(scaled > this.scaleDelta){
 						this.onScale(px, py, -1);
 					} else {
 						this.onScale(px, py, 1);
