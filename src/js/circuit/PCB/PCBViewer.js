@@ -18,14 +18,12 @@ define(
 	 	"./Element",
 	 	"./ElementLine",
 	 	"./ElementArc",
+	 	"./Polygon",
 	 	"./Symbol",
-	 	"./LayerManager",
-	 	"Graphics/glMatrix",
-	 	"Graphics/GLHelper",
-	 	"text!../../../data/shaders/2D.fs",
-	 	"text!../../../data/shaders/2D.vs",
-	 	"text!../../../data/shaders/Texture.fs",
-	 	"text!../../../data/shaders/Texture.vs"
+	 	"./Renderers/TwoDRenderer",
+	 	"./Renderers/GLRenderer",
+	 	"Util/DOM",
+	 	"Util/Touch/Touch"
 	],
 	function(
 		Line,
@@ -37,19 +35,15 @@ define(
 		Element,
 		ElementLine,
 		ElementArc,
+		Polygon,
 		Symbol,
-		LayerManager,
-		glMatrix,
-		GLHelper,
-		FragmentShader2Dtxt,
-		VertexShader2Dtxt,
-		FragmentShaderTextxt,
-		VertexShaderTextxt
+		TwoDRenderer,
+		GLRenderer,
+		DOM,
+		Touch
 	){
 
-		function PCBV(canvas, attach) {
-
-			var gl;
+		function PCBV(canvas, attach, mode) {
 
 			this._layerColors = PCBV._defaultLayerColors;
 
@@ -63,7 +57,11 @@ define(
 
 			if(attach){
 
-				this.ctx = false;//PCBV._getWebGL(canvas);
+				if(mode == "Normal")
+					this.ctx = false;
+				else
+					this.ctx = PCBV._getWebGL(canvas);
+
 				if(this.ctx == false){
 
 					this.mode = "Normal";
@@ -73,125 +71,22 @@ define(
 
 					this.mode = "Accelerated";
 
-					gl = this.ctx;
-
-					gl.viewportWidth = canvas.width;
-					gl.viewportHeight = canvas.height;
-
-					// 2D Shader
-
-					this.shaderProgram = GLHelper.createProgram(gl, 
-							GLHelper.createShader(gl, gl.VERTEX_SHADER, VertexShader2Dtxt),
-							GLHelper.createShader(gl, gl.FRAGMENT_SHADER, FragmentShader2Dtxt));
-
-					this.shaderProgram.vertexPositionAttribute = gl.getAttribLocation(this.shaderProgram, "aVertexPosition");
-			        gl.enableVertexAttribArray(this.shaderProgram.vertexPositionAttribute);
-
-			        this.shaderProgram.pMatrixUniform = gl.getUniformLocation(this.shaderProgram, "uPMatrix");
-			        this.shaderProgram.mvMatrixUniform = gl.getUniformLocation(this.shaderProgram, "uMVMatrix");
-			        this.shaderProgram.vColorUniform = gl.getUniformLocation(this.shaderProgram, "vColor");
-
-			        this.shaderProgram.pointsizeUniform = gl.getUniformLocation(this.shaderProgram, "pointsize");
-			        this.shaderProgram.innerRadiusUniform = gl.getUniformLocation(this.shaderProgram, "innerRadius");
-			        this.shaderProgram.roundPointsUniform = gl.getUniformLocation(this.shaderProgram, "roundPoints");
-			        this.shaderProgram.startAngleUniform = gl.getUniformLocation(this.shaderProgram, "startAngle");
-			        this.shaderProgram.sweepUniform = gl.getUniformLocation(this.shaderProgram, "sweep");
-			        this.shaderProgram.arcEnabledUniform = gl.getUniformLocation(this.shaderProgram, "arcEnabled");
-			        this.shaderProgram.invertedUniform = gl.getUniformLocation(this.shaderProgram, "inverted");
-
-			        // Texture Shader
-
-					this.texShaderProgram = GLHelper.createProgram(gl, 
-							GLHelper.createShader(gl, gl.VERTEX_SHADER, VertexShaderTextxt),
-							GLHelper.createShader(gl, gl.FRAGMENT_SHADER, FragmentShaderTextxt));
-
-			        this.texShaderProgram.vertexPositionAttribute = gl.getAttribLocation(this.texShaderProgram, "aVertexPosition");
-			        gl.enableVertexAttribArray(this.texShaderProgram.vertexPositionAttribute);
-
-			        this.texShaderProgram.textureCoordAttribute = gl.getAttribLocation(this.texShaderProgram, "aTextureCoord");
-			        gl.enableVertexAttribArray(this.texShaderProgram.textureCoordAttribute);
-
-			        this.texShaderProgram.pMatrixUniform = gl.getUniformLocation(this.texShaderProgram, "uPMatrix");
-			        this.texShaderProgram.mvMatrixUniform = gl.getUniformLocation(this.texShaderProgram, "uMVMatrix");
-			        this.texShaderProgram.samplerUniform = gl.getUniformLocation(this.texShaderProgram, "uSampler");
-
-			        // Viewport setup
-			        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
 				}
 
 				this.last_time = 0;
 				this.end_time = 0;
 		
-				this.clicking = false;
-			
-				this.mouse_x = canvas.width/2;
-				this.mouse_y = canvas.height/2;
-		
-				this.mouseUpFunction = function(t){return function(e){if(e.which == 1) t.clicking = false;};}(this);
-				this.mouseDownFunction = function(t){return function(e){if(e.which == 1) t.clicking = true;};}(this)
-				this.keyDownFunction = function(t){return function(e){t.update_key(e);};}(this);
-				this.mouseMoveFunction = function(t){return function(e){
-					if(t.clicking)
-						t.update_mouse_drag(t.mouse_x-e.pageX, t.mouse_y-e.pageY);		
-					t.mouse_x = e.pageX;
-					t.mouse_y = e.pageY;
-				};}(this);
-				this.mouseWheelFunction = function(t){return function(e){t.wheel(e);};}(this);
-
-				if(window.addEventListener){
-					document.addEventListener("mouseup", this.mouseUpFunction, false);
-					this.canvas.addEventListener("mousewheel", this.mouseWheelFunction, false);
-					this.canvas.addEventListener('DOMMouseScroll', this.mouseWheelFunction, false);
-				} else {
-					document.attachEvent("mouseup", this.mouseUpFunction);
-					this.canvas.attachEvent("onmousewheel", this.mouseWheelFunction);
-				}
-				canvas.onmousedown = this.mouseDownFunction;
-				canvas.onkeydown = this.keyDownFunction;
-				canvas.onmousemove = this.mouseMoveFunction;
+				this._setupEventHandlers();
 
 			};
+
+			console.log("Mode: " + this.mode);
 		
 		};
 
 		PCBV.prototype.destroy = function(){
 
-			var i;
-
-			if(this.mode == "Accelerated"){
-
-				var gl = this.ctx;
-
-				for(i = 0; i < this.vias.length; i++)
-					this.vias[i].cleanupGL(gl);
-				for(i = 0; i < this.layers.length; i++)
-					this.layers[i].cleanupGL(gl);
-				for(i = 0; i < this.elements.length; i++)
-					this.elements[i].cleanupGL(gl);
-				for(i in this.symbols)
-					this.symbols[i].cleanupGL(gl);
-
-				// Restore GL Defaults
-				gl.disable(gl.BLEND);
-				gl.useProgram(null);
-				gl.blendFunc(gl.ONE, gl.ZERO);
-				gl.clearColor(0, 0, 0, 0);
-
-				// Unbind all buffers
-				gl.bindTexture(gl.TEXTURE_2D, null);
-				gl.bindBuffer(gl.ARRAY_BUFFER, null);
-				gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-				gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-
-				// Clear viewport
-				gl.viewport(0, 0, gl.viewportWidth, gl.viewportheight);
-				gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-				// Clear errors
-				while(gl.getError());
-
-			}
+			this.renderer.destroy();
 
 			if(window.addEventListener){
 				document.removeEventListener("mouseup", this.mouseUpFunction, false);
@@ -204,8 +99,13 @@ define(
 			this.canvas.onmousedown = null;
 			this.canvas.onkeydown = null;
 			this.canvas.onmousemove = null;
+			this.canvas.ontouchstart = null;
+			this.canvas.ontouchmove = null;
+			this.canvas.ontouchend = null;
+			this.canvas.ontouchcancel = null;
+			this.canvas.ontouchleave = null;
 
-		}
+		};
 
 		// TODO: maybe make this layer named based!
 		PCBV._defaultLayerColors = ['#8B2323', '#3A5FCD', '#104E8B', '#CD3700',
@@ -233,18 +133,340 @@ define(
 			return false;
 		}
 
-		PCBV.prototype.getLayerColors = function(){
-			return this._layerColors;
+		PCBV.prototype._buildLayers = function(){
+
+			var top = [], solder = [], pins = [];
+
+			var i, j;
+			for(i = 0; i < this.elements.length; i++){
+
+				if(!this.elements[i].onsolder()){
+					this.renderer.bottomSilk.parts.push(this.elements[i]);
+				} else {
+					this.renderer.topSilk.parts.push(this.elements[i]);
+				}
+
+				for(j = 0; j < this.elements[i].parts.length; j++){
+					if(this.elements[i].parts[j] instanceof Pin)
+						pins.push(this.elements[i].parts[j]);
+					else if(
+					  this.elements[i].parts[j] instanceof ElementLine ||
+					  this.elements[i].parts[j] instanceof ElementArc ||
+					  this.elements[i].parts[j] instanceof Text
+					 ){
+						if(!this.elements[i].onsolder())
+							this.renderer.bottomSilk.parts.push(this.elements[i].parts[j]);
+						else
+							this.renderer.topSilk.parts.push(this.elements[i].parts[j]);
+					} else if(this.elements[i].onsolder())
+						solder.push(this.elements[i].parts[j]);
+					else
+						top.push(this.elements[i].parts[j]);
+				}
+			}
+
+			for(i = 0; i < this.vias.length; i++)
+				pins.push(this.vias[i]);
+
+			this.renderer.addLayer(new Layer(this, -1, "top_component", top));
+			this.renderer.addLayer(new Layer(this, -2, "solder_component", solder));
+			this.renderer.addLayer(new Layer(this, -3, "pins", pins));
+
+		};
+
+		PCBV.prototype._setupEventHandlers = function(){
+
+			this.clicking = false;
+			
+			this.mouseX = this.canvas.width / 2;
+			this.mouseY = this.canvas.height/ 2;
+	
+			this.mouseUpFunction = function(t){return function(e){if(e.which == 1) t.clicking = false;};}(this);
+			this.mouseDownFunction = function(t){return function(e){if(e.which == 1) t.clicking = true;};}(this)
+			this.keyDownFunction = function(t){return function(e){t._updateKey(e);};}(this);
+			this.mouseMoveFunction = function(t){return function(e){
+				if(t.clicking)
+					t._updateMouseDrag(t.mouseX-e.pageX, t.mouseY-e.pageY);		
+				t.mouseX = e.pageX;
+				t.mouseY = e.pageY;
+			};}(this);
+			this.mouseWheelFunction = function(t){return function(e){t._wheel(e);};}(this);
+			this.onTouchStartFunction = function(t){return function(e){t._touchStart(e);};}(this);
+			this.onTouchMoveFunction = function(t){return function(e){t._touchMove(e);};}(this);
+			this.onTouchEndFunction = function(t){return function(e){t._touchEnd(e);};}(this);
+			this.onTouchCancelFunction = function(t){return function(e){e.preventDefault();};}(this);
+			
+			if(window.addEventListener){
+				document.addEventListener("mouseup", this.mouseUpFunction, false);
+				this.canvas.addEventListener("mousewheel", this.mouseWheelFunction, false);
+				this.canvas.addEventListener('DOMMouseScroll', this.mouseWheelFunction, false);
+			} else {
+				document.attachEvent("mouseup", this.mouseUpFunction);
+				this.canvas.attachEvent("onmousewheel", this.mouseWheelFunction);
+			}
+			this.canvas.onmousedown = this.mouseDownFunction;
+			this.canvas.onkeydown = this.keyDownFunction;
+			this.canvas.onmousemove = this.mouseMoveFunction;
+			this.canvas.ontouchstart = this.onTouchStartFunction;
+			this.canvas.ontouchmove = this.onTouchMoveFunction;
+			this.canvas.ontouchend = this.onTouchEndFunction;
+			this.canvas.ontouchcancel = this.onTouchCancelFunction;
+			this.canvas.ontouchleave = this.onTouchEndFunction;
+
+			this.touches = [];
+
 		}
 
-		PCBV.prototype.resize = function(){
-		
-			this.buffer_layer.width = this.canvas.width;
-			this.buffer_layer.height = this.canvas.height;
+		PCBV.prototype._touchStart = function(e){
+
+			e.preventDefault();
+			var tch = e.changedTouches;
+
+			for(var i = 0; i < tch.length; i++){
+				this.touches.push(Touch.from_touch(tch[i]));
+			}
+
+			if(this.touches.length == 1){
+
+				this.mouse_down_x = this.touches[0].x;
+				this.mouse_down_y = this.touches[0].y;
+
+				this.touch_clicking = true;
+
+			}
+
+			// If 2 fingers we are zooming in/out
+			else if(this.touches.length == 2){
+
+				this.scale_distance_last = Math.sqrt( Math.pow(this.touches[0].x - this.touches[1].x, 2) + Math.pow(this.touches[0].y - this.touches[1].y, 2) );
+				this.scale_delta = 0;
+
+				this.touch_clicking = false;
+
+			}
+
+		};
+
+		PCBV.prototype._touchMove = function(e){
+
+			e.preventDefault();
+			var tch = e.changedTouches;
+
+			// If 1 finger we are dragging
+			if(this.touches.length == 1){
+
+				var ot = this.touches[0];
+					nt = Touch.from_touch(tch[0]),
+					dx = ot.x - nt.x,
+					dy = ot.y - nt.y;
+
+				this._updateMouseDrag(dx, dy);
+
+			}
+
+			// update the touches
+			for(var i = 0; i < tch.length; i++){
+				for(var j = 0; j < this.touches.length; j++){
+					if(this.touches[j].id == tch[i].identifier){
+						this.touches[j].x = tch[i].pageX;
+						this.touches[j].y = tch[i].pageY;
+						break;
+					}
+				}
+			}
+
+			// If 2 fingers we are zooming in/out
+			if(this.touches.length == 2){
+
+				var touch_distance = Math.sqrt( Math.pow(this.touches[0].x - this.touches[1].x, 2) + Math.pow(this.touches[0].y - this.touches[1].y, 2) );
+
+				var center = {x: 0, y: 0};
+				center.x = (this.touches[0].x + this.touches[1].x)/2;
+				center.y = (this.touches[0].y + this.touches[1].y)/2;
+
+				var off = DOM.offset(this.canvas),
+					px = center.x - off.x,
+					py = center.y - off.y;
+
+				// Set partial scale
+				var change = this.scale_distance_last - touch_distance;
+				var scaled = Math.floor(change/40);
+				if(scaled != this.scale_delta){
+
+					if(scaled > this.scale_delta){
+						this._updateMouseScroll(px, py, -1);
+					} else {
+						this._updateMouseScroll(px, py, 1);
+					}
+					this.scale_delta = scaled;
+				}
+			}
+
+		};
+		PCBV.prototype._touchEnd = function(e){
+
+			e.preventDefault();
+
+			var tch = e.changedTouches;
+
+			// remove the touch
+			for(var i = 0; i < tch.length; i++){
+				for(var j = 0; j < this.touches.length; j++){
+					if(this.touches[j].id == tch[i].identifier){
+						this.touches.splice(j, 1);
+							break;
+					}
+				}
+			}
+
+		};
+
+		PCBV.prototype._wheel = function(e) {
+			
+			var	ev = window.event || e,
+				d,
+				off = DOM.offset(this.canvas);
+	
+			if(ev.stopPropagation) ev.stopPropagation();
+			if(ev.preventDefault) ev.preventDefault();
+			ev.returnValue = false;
+	
+			d = Math.max(-1, Math.min(1, (ev.wheelDelta || -ev.detail)));
+	
+			this._updateMouseScroll(this.mouseX - off.x, this.mouseY - off.y, d);
+	
+		};
+	
+		// Key event handler
+		PCBV.prototype._updateKey = function(e){
+	
+			var which = e.which, prevent = true;
+	
+			var shift = 10;
+
+			switch(which){
+				case 38: // Down
+					if(this.side) this.offset.y -= this.height/shift;
+					else this.offset.y += this.height/shift;
+					break;
+				case 37: // Left
+					this.offset.x += this.width/shift;
+					break;
+				case 39: // Right
+					this.offset.x -= this.width/shift;
+					break;
+				case 40: // Up
+					if(this.side) this.offset.y += this.height/shift;
+					else this.offset.y -= this.height/shift;
+					break;
+				case 65: // Flip side
+					this.side = !this.side;
+					break;
+				case 90: // Z : Zoom in
+					this.offset.y += ((this.canvas.height-(this.canvas.height/1.1))/2)/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
+					this.offset.x += ((this.canvas.width-(this.canvas.width/1.1))/2)/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
+					this.scale *= 1.1;
+					break;
+				case 88: // X : Zoom out
+					this.offset.y += ((this.canvas.height-(this.canvas.height*1.1))/2)/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
+					this.offset.x += ((this.canvas.width-(this.canvas.width*1.1))/2)/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
+					this.scale /= 1.1;
+					break;
+				default:
+					prevent = false;
+			}
+	
+			if(prevent){
+				if(e.stopPropagation) e.stopPropagation();
+				if(e.preventDefault) e.preventDefault();
+				e.returnValue = false;
+			}
+	
+			this.render();
 		
 		};
 	
-		PCBV.prototype.parse_data = function(data){
+		// Drag event handler
+		PCBV.prototype._updateMouseDrag = function(x, y){
+
+			var dx, dy, min;
+
+			min = Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale;
+
+			dy = y / min;
+            dx = x / min;
+
+			if(this.side) this.offset.y -= dy;
+			else this.offset.y += dy;
+			this.offset.x += dx;
+
+			this.render();
+	
+		};
+	
+		// Scroll event handler
+		PCBV.prototype._updateMouseScroll = function(x, y, s){
+
+			if(s > 0){ // Zoom in
+				if(this.side) this.offset.y += (((this.canvas.height-(this.canvas.height/1.1))/2)*((this.canvas.height-y)/this.canvas.height*2))/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
+				else this.offset.y += (((this.canvas.height-(this.canvas.height/1.1))/2)*(2-((this.canvas.height-y)/this.canvas.height*2)))/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
+				this.offset.x += (((this.canvas.width-(this.canvas.width/1.1))/2)*(2-((this.canvas.width-x)/this.canvas.width*2)))/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
+				this.scale *= 1.1;
+			} else { // Zoom out
+				if(this.side) this.offset.y += (((this.canvas.height-(this.canvas.height*1.1))/2)*((this.canvas.height-y)/this.canvas.height*2))/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
+				else this.offset.y += (((this.canvas.height-(this.canvas.height*1.1))/2)*(2-((this.canvas.height-y)/this.canvas.height*2)))/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
+				this.offset.x += (((this.canvas.width-(this.canvas.width*1.1))/2)*(2-((this.canvas.width-x)/this.canvas.width*2)))/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
+				this.scale /= 1.1;
+			}
+			this.render();
+		};
+
+		PCBV.prototype._doRender = function(){
+
+			// Calculate how much we need to scale based on size of the
+			// pcb vs canvas size and how zoomed in we are
+			scalef = Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale;
+
+			if(this.resized){
+				this.renderer.resize();
+				this.resized = false;
+			}
+
+			this.renderer.render(this.side, this.offset.x, this.offset.y, scalef);
+
+			this.end_time = (new Date()).getTime();
+
+		};
+
+		PCBV.prototype.getLayerColors = function(){
+			return this._layerColors;
+		};
+
+		PCBV.prototype.resize = function(){
+			this.resized = true;
+		};
+
+		PCBV.prototype.setup = function(){
+
+			this.offset = {};	// Board offset to render at
+			this.offset.x = 0;
+			this.offset.y = 0;
+	
+			this.side = Layer.SOLDER;
+	
+			this.scale = 1.0;
+
+			if(this.mode == "Accelerated")
+				this.renderer = new GLRenderer(this.ctx, this.canvas, this.symbols, this.layers, this.width, this.height);
+			else
+				this.renderer = new TwoDRenderer(this.ctx, this.canvas, this.symbols, this.layers, this.width, this.height);
+
+			this._buildLayers();
+			this.renderer.setup();
+
+		};
+
+		PCBV.prototype.parse = function(data){
 	
 			var lines, l, splt, new_obj, sub_obj, xmi, xma;
 	
@@ -360,8 +582,38 @@ define(
 	
 							new_obj.parts.push(sub_obj);
 	
-						};
-	
+						} else if(line.substr(0, 7) == "Polygon"){
+
+							var flags = line.substr(9,line.length-11), points = [];
+
+							line = '';
+							while(line.indexOf(')') == -1){
+
+								l++;
+								line = lines[l];
+
+								var bracket_idx = line.indexOf('[');
+								while(bracket_idx != -1){
+
+									var space_idx = line.indexOf(' ', bracket_idx);
+
+									var newPoint = {
+										x: parseFloat(line.substring(bracket_idx + 1, space_idx)),
+										y: parseFloat(line.substring(space_idx + 1, line.indexOf(']', space_idx))),
+									};
+									points.push(newPoint);
+									bracket_idx++;
+									bracket_idx = line.indexOf('[', bracket_idx);
+
+								}
+
+							}
+
+							sub_obj = new Polygon(flags, points);
+							new_obj.parts.push(sub_obj);
+
+						}
+
 					}
 	
 					this.layers.push(new_obj);
@@ -405,282 +657,13 @@ define(
 	
 					this.symbols[new_obj.name] = new_obj;
 	
-				} else if(line.substr(0, 7) == "Polygon"){
-	
-					//
-	
-				}
+				} else {}
 	
 				l++;
 	
 			}
-	
-			this.offset = {};	// Board offset to render at
-			this.offset.x = 0;
-			this.offset.y = 0;
-	
-			this.side = Layer.SOLDER;
-	
-			this.scale = 1.0;
 
-			if(this.mode == "Accelerated"){
-
-				var top = [], solder = [], pins = [];
-
-				this.layerManager = new LayerManager(this.layers);
-
-				var i, j;
-				for(i = 0; i < this.elements.length; i++){
-
-					if(!this.elements[i].onsolder()){
-						this.layerManager.bottomSilk.parts.push(this.elements[i]);
-					} else {
-						this.layerManager.topSilk.parts.push(this.elements[i]);
-					}
-
-					for(j = 0; j < this.elements[i].parts.length; j++){
-						if(this.elements[i].parts[j] instanceof Pin)
-							pins.push(this.elements[i].parts[j]);
-						else if(
-						  this.elements[i].parts[j] instanceof ElementLine ||
-						  this.elements[i].parts[j] instanceof ElementArc ||
-						  this.elements[i].parts[j] instanceof Text
-						 ){
-							if(!this.elements[i].onsolder())
-								this.layerManager.bottomSilk.parts.push(this.elements[i].parts[j]);
-							else
-								this.layerManager.topSilk.parts.push(this.elements[i].parts[j]);
-						} else if(this.elements[i].onsolder())
-							solder.push(this.elements[i].parts[j]);
-						else
-							top.push(this.elements[i].parts[j]);
-					}
-				}
-
-				for(i in this.symbols){
-					this.symbols[i].init3DArrays(this.ctx);
-				}
-
-				for(i = 0; i < this.vias.length; i++){
-					pins.push(this.vias[i]);
-				}
-
-				this.layerManager.top = new Layer(this, -1, "top_component", top);
-				this.layerManager.solder = new Layer(this, -2, "solder_component", solder);
-				this.layerManager.pins = new Layer(this, -3, "pins", pins);
-				this.layerManager.layers.push(this.layerManager.top);
-				this.layerManager.layers.push(this.layerManager.solder);
-				this.layerManager.layers.push(this.layerManager.pins);
-
-				this.layerManager.setupFramebuffers(this.ctx, this.canvas.width, this.canvas.height);
-				this.layerManager.init3DArrays(this.ctx);
-				this.layerManager.setupGL(this.ctx, this.width, this.height);
-
-			}
-			
 		};
-		
-		PCBV.prototype.wheel = function(e) {
-	
-			var	ev = window.event || e,
-				d,
-				elem = this.canvas,
-				doc = elem && elem.ownerDocument,
-				docElem = doc.documentElement,
-				box = elem.getBoundingClientRect(),
-				off = {
-					top: box.top  + (window.pageYOffset || docElem.scrollTop)  - (docElem.clientTop  || 0),
-					left: box.left + (window.pageXOffset || docElem.scrollLeft) - (docElem.clientLeft || 0)
-				};
-	
-			if(ev.stopPropagation) ev.stopPropagation();
-			if(ev.preventDefault) ev.preventDefault();
-			ev.returnValue = false;
-	
-			d = Math.max(-1, Math.min(1, (ev.wheelDelta || -ev.detail)));
-	
-			this.update_mouse_scroll(this.mouse_x-off.left, this.mouse_y-off.top, d);
-	
-		};
-	
-		// Key event handler
-		PCBV.prototype.update_key = function(e){
-	
-			var which = e.which, prevent = true;
-	
-			var shift = 10;
-
-			switch(which){
-				case 38: // Down
-					if(this.side) this.offset.y -= this.height/shift;
-					else this.offset.y += this.height/shift;
-					break;
-				case 37: // Left
-					this.offset.x += this.width/shift;
-					break;
-				case 39: // Right
-					this.offset.x -= this.width/shift;
-					break;
-				case 40: // Up
-					if(this.side) this.offset.y += this.height/shift;
-					else this.offset.y -= this.height/shift;
-					break;
-				case 65: // Flip side
-					this.side = !this.side;
-					break;
-				case 90: // Z : Zoom in
-					this.offset.y += ((this.canvas.height-(this.canvas.height/1.1))/2)/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
-					this.offset.x += ((this.canvas.width-(this.canvas.width/1.1))/2)/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
-					this.scale *= 1.1;
-					break;
-				case 88: // X : Zoom out
-					this.offset.y += ((this.canvas.height-(this.canvas.height*1.1))/2)/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
-					this.offset.x += ((this.canvas.width-(this.canvas.width*1.1))/2)/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
-					this.scale /= 1.1;
-					break;
-				default:
-					prevent = false;
-			}
-	
-			if(prevent){
-				if(e.stopPropagation) e.stopPropagation();
-				if(e.preventDefault) e.preventDefault();
-				e.returnValue = false;
-			}
-	
-			this.render();
-		
-		};
-	
-		// Drag event handler
-		PCBV.prototype.update_mouse_drag = function(x, y){
-
-			var dx, dy, min;
-
-				min = Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale;
-
-				dy = y / min;
-	            dx = x / min;
-
-			if(this.side) this.offset.y -= dy;
-			else this.offset.y += dy;
-			this.offset.x += dx;
-
-			this.render();
-	
-		};
-	
-		// Scroll event handler
-		PCBV.prototype.update_mouse_scroll = function(x, y, s){
-
-			if(s > 0){ // Zoom in
-				if(this.side) this.offset.y += (((this.canvas.height-(this.canvas.height/1.1))/2)*((this.canvas.height-y)/this.canvas.height*2))/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
-				else this.offset.y += (((this.canvas.height-(this.canvas.height/1.1))/2)*(2-((this.canvas.height-y)/this.canvas.height*2)))/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
-				this.offset.x += (((this.canvas.width-(this.canvas.width/1.1))/2)*(2-((this.canvas.width-x)/this.canvas.width*2)))/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
-				this.scale *= 1.1;
-			} else { // Zoom out
-				if(this.side) this.offset.y += (((this.canvas.height-(this.canvas.height*1.1))/2)*((this.canvas.height-y)/this.canvas.height*2))/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
-				else this.offset.y += (((this.canvas.height-(this.canvas.height*1.1))/2)*(2-((this.canvas.height-y)/this.canvas.height*2)))/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
-				this.offset.x += (((this.canvas.width-(this.canvas.width*1.1))/2)*(2-((this.canvas.width-x)/this.canvas.width*2)))/(Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale);
-				this.scale /= 1.1;
-			}
-			this.render();
-		};
-
-		PCBV.prototype.render_layers = function(){
-	
-			this.buffer_ctx.clearRect(0, 0, this.buffer_layer.width, this.buffer_layer.height);
-		
-			var bot_silk = null, top_silk = null,
-				i;
-	
-			for(i = 0; i < this.layers.length; i++){
-				if(this.layers[i].name == 'silk'){
-					if(top_silk) bot_silk = this.layers[i];
-					else top_silk = this.layers[i];
-				};
-			}
-		
-			if(this.side) bot_silk.render(this.buffer_ctx, '#FFFFFF');
-			else top_silk.render(this.buffer_ctx, '#FFFFFF');
-		
-			if(this.side){
-				for(i = 0; i < this.layers.length; i++)
-					if(this.layers[i].name != 'silk') this.layers[i].render(this.buffer_ctx);
-			} else {
-				for(i = this.layers.length-1; i >= 0; i--)
-					if(this.layers[i].name != 'silk') this.layers[i].render(this.buffer_ctx);
-			}
-		
-			if(this.side) top_silk.render(this.buffer_ctx);
-			else bot_silk.render(this.buffer_ctx);
-		
-			this.ctx.drawImage(this.buffer_layer, 0, 0);
-		
-		};
-
-		PCBV.prototype._do_render = function(){
-
-			// Calculate how much we need to scale based on size of the
-			// pcb vs canvas size and how zoomed in we are
-			scalef = Math.min(this.canvas.width/this.width, this.canvas.height/this.height)*this.scale;
-
-			if(this.mode == "Accelerated"){
-
-				this.layerManager.renderGL(this.ctx, this.shaderProgram, this.texShaderProgram, this.side, this.offset.x, this.offset.y, scalef);
-
-			} else {
-
-				// Fill canvas background Dark Grey
-				this.buffer_ctx.fillStyle = '#CCCCCC';
-				this.buffer_ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-			
-				// Save default tranform
-				this.buffer_ctx.save();
-			
-				// Flip canvas if solder side
-				if(this.side){
-					this.buffer_ctx.scale(1, -1);
-					this.buffer_ctx.translate(0, -this.canvas.height);
-				}
-			
-				// Scale and shift
-				this.buffer_ctx.scale(scalef, scalef);
-				this.buffer_ctx.translate(-this.offset.x, -this.offset.y);	
-
-				// Fill board space Grey
-				this.buffer_ctx.fillStyle = '#E5E5E5';
-				this.buffer_ctx.fillRect(0, 0, this.width, this.height);
-
-				this.ctx.globalAlpha = 1.0;
-			
-				this.ctx.drawImage(this.buffer_layer, 0, 0);
-			
-				this.ctx.globalAlpha = 0.5;
-			
-				this.buffer_ctx.clearRect(0, 0, this.buffer_layer.width, this.buffer_layer.height);
-				for(i = 0; i < this.elements.length; i++) if(!this.elements[i].onsolder() != !this.side) this.elements[i].render(this.buffer_ctx, '#FFFFFF', !this.side);
-				this.ctx.drawImage(this.buffer_layer, 0, 0);
-			
-				this.render_layers();
-			
-				this.buffer_ctx.clearRect(0, 0, this.buffer_layer.width, this.buffer_layer.height);
-				for(i = 0; i < this.elements.length; i++) if(this.elements[i].onsolder() == this.side) this.elements[i].render(this.buffer_ctx, '#000000', this.side);
-				for(i = 0; i < this.elements.length; i++) if(!this.elements[i].onsolder() != !this.side) this.elements[i].render(this.buffer_ctx, '#000000', this.side, true);
-				this.ctx.drawImage(this.buffer_layer, 0, 0);
-			
-				this.buffer_ctx.clearRect(0, 0, this.buffer_layer.width, this.buffer_layer.height);
-				for(i = 0; i < this.vias.length; i++) this.vias[i].render(this.buffer_ctx);
-				this.ctx.drawImage(this.buffer_layer, 0, 0);
-			
-				// Restore default tranform
-				this.buffer_ctx.restore();
-
-			}
-
-			this.end_time = (new Date()).getTime();
-
-		}
 
 		PCBV.prototype.render = function(force, timeout){
 		
@@ -696,7 +679,7 @@ define(
 			}
 
 			// Using requestAnimFrame prevents Screen Tearing
-			window.requestAnimFrame(function(){t._do_render();});
+			window.requestAnimFrame(function(){t._doRender();});
 
 		};
 

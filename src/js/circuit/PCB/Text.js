@@ -30,7 +30,7 @@ define(
 			this.scaling = scaling;
 			this.str = str;
 			this.flags = flags;
-	
+
 		};
 	
 		Text.prototype.render = function(ctx, color){
@@ -53,7 +53,9 @@ define(
 			ctx.restore();
 	
 		};
-	
+
+		Text.prototype.clear = function(ctx){};
+
 		Text.prototype.renderGL = function(gl, shaderProgram){
 
 			var sym, mvMatrix;
@@ -81,6 +83,8 @@ define(
 	        gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
 
 		}
+
+		Text.prototype.clearGL = function(gl, shaderProgram){};
 	
 		Text.prototype.cleanupGL = function(gl){}
 

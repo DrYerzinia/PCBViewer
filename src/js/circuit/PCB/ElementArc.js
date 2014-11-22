@@ -20,11 +20,21 @@ define(
 		};
 	
 		ElementArc.prototype.render = function(ctx, color) {
-	
+
+			if(!this._cache){
+				this._cache = {}
+				this._cache.x = this.x;
+				this._cache.y = this.y;
+				if(this.parent){
+					this._cache.x += this.parent.mx;
+					this._cache.y += this.parent.my;
+				}
+			}
+
 			ctx.beginPath();
 			ctx.arc(
-				this.x,
-				this.y,
+				this._cache.x,
+				this._cache.y,
 				this.r1,
 				(Math.PI * 2) - (Math.PI * this.start / 180.0),
 				(Math.PI * 2) - (Math.PI * (this.start + this.sweep) / 180.0),
@@ -37,7 +47,9 @@ define(
 			ctx.closePath();
 	
 		};
-	
+
+		ElementArc.prototype.clear = function(ctx){};
+
 		ElementArc.prototype.renderGL = function(gl, shaderProgram){
 	
 			var outerRadius, innerRadius, radiusRatio;
@@ -54,7 +66,7 @@ define(
 				gl.uniform1f(shaderProgram.invertedUniform, false);
 			gl.uniform1f(shaderProgram.startAngleUniform, (this.start / 180.0 * Math.PI) - Math.PI);
 			gl.uniform1f(shaderProgram.sweepUniform, (this.sweep / 180.0 * Math.PI));
-		
+
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.pointBuffer);
 			gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, this.pointBuffer.itemSize, gl.FLOAT, false, 0, 0);
 	
@@ -68,6 +80,8 @@ define(
 			gl.uniform1f(shaderProgram.roundPointsUniform, false);
 	
 		}
+
+		ElementArc.prototype.clearGL = function(gl, shaderProgram){};
 
 		ElementArc.prototype.cleanupGL = function(gl){
 

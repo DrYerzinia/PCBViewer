@@ -14,7 +14,6 @@ define(
 				tx, ty, txtdir, txtscl, txtflg) {
 	
 			this.pcbv = pcbv;
-			this.flags = flags;
 			this.desc = desc;
 			this.refdes = refdes;
 			this.mx = mx;
@@ -26,75 +25,70 @@ define(
 			this.txtflg = txtflg;
 			this.parts = [];
 	
+			this.flags = {
+				hidename: false,
+				onsolder: false
+			};
+
+			var split = flags.split(','), i;
+
+			for(i = 0; i < split.length; i++)
+				this.flags[split[i]] = true;
+
 		};
 	
 		Element.prototype.onsolder = function() {
 	
-			var splt = this.flags.split(',');
-	
-			for (var i = 0; i < splt.length; i++)
-				if (splt[i] == 'onsolder')
-					return true;
-			return false;
+			return this.flags.onsolder;
 	
 		};
 	
 		Element.prototype.render = function(ctx, color, mirror,	pins_only) {
-	
+
 			var i, sym, rot = 0;
 	
 			ctx.save();
 	
 			ctx.translate(this.mx, this.my);
-	
-			for (i = 0; i < this.parts.length; i++) {
-				if (pins_only) {
-					if (this.parts[i] instanceof Pin)
-						this.parts[i].render(ctx, color);
-				} else {
-					this.parts[i].render(ctx, color);
+
+			if(!this.flags.hidename){
+
+				switch(this.txtdir) {
+					case 0:
+						rot = 0;
+						break;
+					case 1:
+						rot = -0.5 * Math.PI;
+						break;
+					case 2:
+						rot = Math.PI;
+						break;
+					case 3:
+						rot = 0.5 * Math.PI;
+						break;
 				}
-			}
-	
-			if (pins_only) {
+		
+				ctx.save();
+				ctx.translate(this.tx, this.ty);
+		
+				if (mirror)
+					ctx.scale(1, -1);
+		
+				ctx.rotate(rot);
+		
+				for (i = 0; i < this.refdes.length; i++) {
+					sym = this.pcbv.symbols[this.refdes[i]];
+					sym.render(ctx, color);
+					ctx.translate(sym.width + 1000, 0);
+				}
+		
 				ctx.restore();
-				return;
-			}
-	
-			switch(this.txtdir) {
-				case 0:
-					rot = 0;
-					break;
-				case 1:
-					rot = -0.5 * Math.PI;
-					break;
-				case 2:
-					rot = Math.PI;
-					break;
-				case 3:
-					rot = 0.5 * Math.PI;
-					break;
-			}
-	
-			ctx.save();
-			ctx.translate(this.tx, this.ty);
-	
-			if (mirror)
-				ctx.scale(1, -1);
-	
-			ctx.rotate(rot);
-	
-			for (i = 0; i < this.refdes.length; i++) {
-				sym = this.pcbv.symbols[this.refdes[i]];
-				sym.render(ctx, color);
-				ctx.translate(sym.width + 1000, 0);
 			}
 	
 			ctx.restore();
-	
-			ctx.restore();
-	
 		};
+
+		Element.prototype.clear = function(ctx){};
 
 		Element.prototype.renderText = function(gl, shaderProgram){
 
@@ -144,13 +138,16 @@ define(
 
 		Element.prototype.renderGL = function(gl, shaderProgram){
 
-			this.renderText(gl, shaderProgram);
+			if(!this.flags.hidename)
+				this.renderText(gl, shaderProgram);
 
 			//var i;
 			//for(i = 0; i < this.parts.length; i++)
 				//this.parts[i].renderGL(gl, shaderProgram);
 
 		}
+
+		Element.prototype.clearGL = function(gl, shaderProgram){};
 
 		Element.prototype.cleanupGL = function(gl){
 

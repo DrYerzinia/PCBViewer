@@ -7,11 +7,19 @@
 	</head>
 	<body>
 		<div style="text-align:center;">
-			PCB:
-			<select id="samplePCBs"></select>
-			<button id="load">Load</button>
-			<br>
-			<canvas id="pcbcan" width="800" height="600" tabindex="1"></canvas>
+			<div style="text-align:center;display:inline;">
+				PCB:
+				<select id="samplePCBs"></select>
+				Mode: 
+				<input type="radio" name="mode" id="Normal" value="Normal">Canvas2D
+				<input type="radio" name="mode" id="Accelerated" value="Accelerated" checked>WebGL
+				<button id="load">Load</button>
+			</div>
+			<div id="Status" style="display:inline;float:right;">
+			</div>
+			<div id="PCB-canvas-container">
+				<canvas id="pcbcan" width="800" height="600" tabindex="1"></canvas>
+			</div>
 		</div>
 	</body>
 </html>
