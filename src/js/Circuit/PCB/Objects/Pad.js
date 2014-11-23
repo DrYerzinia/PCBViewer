@@ -39,12 +39,6 @@ define(function() {
 		this._cache.rx2 = x2 - x1 + thk;
 		this._cache.ry2 = y2 - y1 + thk;
 
-		thk = this.thick + this.clearance;
-		this._cache.rcx1 = x1 - (thk / 2);
-		this._cache.rcy1 = y1 - (thk / 2);
-		this._cache.rcx2 = x2 - x1 + thk;
-		this._cache.rcy2 = y2 - y1 + thk;
-
 	};
 
 	Pad.prototype.render = function(ctx, color) {
@@ -68,11 +62,13 @@ define(function() {
 
 		if(!this._cache) this._createCache();
 
-		ctx.fillRect(
-			this._cache.rcx1,
-			this._cache.rcy1,
-			this._cache.rcx2,
-			this._cache.rcy2);
+		ctx.beginPath();
+		ctx.arc(                  this._cache.rx1, this._cache.ry1                  , this.clearance / 2, -Math.PI      , -Math.PI * 0.5, false);
+		ctx.arc(this._cache.rx1 + this._cache.rx2, this._cache.ry1                  , this.clearance / 2, -Math.PI * 0.5,            0.0, false);
+		ctx.arc(this._cache.rx1 + this._cache.rx2, this._cache.ry1 + this._cache.ry2, this.clearance / 2,            0.0,  Math.PI * 0.5, false);
+		ctx.arc(                  this._cache.rx1, this._cache.ry1 + this._cache.ry2, this.clearance / 2,  Math.PI * 0.5,  Math.PI      , false);
+		ctx.closePath();
+		ctx.fill();
 
 	};
 
