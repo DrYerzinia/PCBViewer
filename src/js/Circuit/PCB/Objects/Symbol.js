@@ -8,6 +8,13 @@ define(function() {
 
 	};
 
+	Symbol.prototype.setSilkWidth = function(width){
+
+		for(var l = 0; l < this.lines.length; l++)
+			this.lines[l].setWidth(width);
+
+	};
+
 	Symbol.prototype.render = function(ctx, color) {
 
 		for (var l = 0; l < this.lines.length; l++)

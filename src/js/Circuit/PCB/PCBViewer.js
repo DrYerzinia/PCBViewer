@@ -334,12 +334,18 @@ define(
 	
 			this.scale = 1.0;
 
+			// Symbols default to bing minimumSilkWidth thickness
+			if(this.drc)
+				for(i in this.symbols)
+					this.symbols[i].setSilkWidth(this.drc.minimumSilkWidth);
+
 			if(this.mode == "Accelerated")
 				this.renderer = new GLRenderer(this.ctx, this.canvas, this.symbols, this.layers, this.width, this.height);
 			else
 				this.renderer = new TwoDRenderer(this.ctx, this.canvas, this.symbols, this.layers, this.width, this.height);
 
 			this._buildLayers();
+
 			this.renderer.setup();
 
 		};
@@ -363,6 +369,20 @@ define(
 					this.width = parseInt(splt[1]);
 					this.height = parseInt(splt[2]);
 	
+				} else if(line.substr(0,3) == "DRC"){
+
+					line = line.substr(4, line.length-2);
+					splt = line.split(' ');
+
+					this.drc = {
+						minimumCopperSpacing: parseInt(splt[0]),
+						minimumCopperWidth: parseInt(splt[1]),
+						minimumTouchingCopperOverlap: parseInt(splt[2]),
+						minimumSilkWidth: parseInt(splt[3]),
+						minimumDrillDiameter: parseInt(splt[4]),
+						minimumAnnularRing: parseInt(splt[5])
+					};
+
 				} else if(line.substr(0,3) == "Via"){
 	
 					line = line.substr(4, line.length-2);

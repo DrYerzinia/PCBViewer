@@ -40,6 +40,10 @@ define(function() {
 
 	};
 
+	ElementLine.prototype.setWidth = function(width){
+		this.thick = width;
+	};
+
 	ElementLine.prototype.render = function(ctx, color) {
 
 		ctx.strokeStyle = color;
