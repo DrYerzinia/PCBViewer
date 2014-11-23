@@ -20,6 +20,7 @@ define(
 	 	"./Objects/ElementArc",
 	 	"./Objects/Polygon",
 	 	"./Objects/Symbol",
+	 	"./Objects/Thermal",
 	 	"./Renderers/TwoDRenderer",
 	 	"./Renderers/GLRenderer",
 	 	"Graphics/GLHelper",
@@ -38,6 +39,7 @@ define(
 		ElementArc,
 		Polygon,
 		Symbol,
+		Thermal,
 		TwoDRenderer,
 		GLRenderer,
 		GLHelper,
@@ -382,6 +384,12 @@ define(
 						minimumDrillDiameter: parseInt(splt[4]),
 						minimumAnnularRing: parseInt(splt[5])
 					};
+
+				} else if(line.substr(0,7) == "Thermal"){
+
+					line = line.substr(8, line.length-2);
+
+					Thermal.space = parseFloat(line);
 
 				} else if(line.substr(0,3) == "Via"){
 	

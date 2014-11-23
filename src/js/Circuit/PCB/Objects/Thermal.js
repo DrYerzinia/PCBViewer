@@ -8,6 +8,8 @@ define(
 
 		};
 
+		Thermal.space = 0.5;
+
 		Thermal._clearArc = function(gl, shaderProgram, pointBuffer, ang1, ang2, shave, outerDiameter, innerDiameter, clearance){
 
 
@@ -21,7 +23,7 @@ define(
 			gl.uniform1f(shaderProgram.startAngleUniform, ang1 + ang2);
 			gl.uniform1f(shaderProgram.sweepUniform, Math.PI / 2 - ang2 * 2);
 			if(shave)
-				gl.uniform1f(shaderProgram.shaveInsideUniform, clearance / outerDiameter / 4);
+				gl.uniform1f(shaderProgram.shaveInsideUniform, clearance / outerDiameter * Thermal.space / 2);
 
 			gl.drawArrays(gl.POINTS, 0, pointBuffer.numItems);
 
@@ -187,7 +189,7 @@ define(
 				case 'S':
 					break;
 				case 't':
-					var clearanceAngle = clearance / ((clearance / 2 + outerDiameter) / 2) / 2;
+					var clearanceAngle = clearance / ((clearance / 2 + outerDiameter) / 2) * Thermal.space;
 					if(!this.pointBuffer) this._createCache(gl, x, y, 0, clearanceAngle, ((clearance / 2) + outerDiameter) / 2);
 					this._clearPoints(gl, shaderProgram, clearance);
 					Thermal._clearArc(gl, shaderProgram, pointBuffer, 0            , clearanceAngle, false, outerDiameter + clearance, outerDiameter, clearance);
@@ -196,7 +198,7 @@ define(
 					Thermal._clearArc(gl, shaderProgram, pointBuffer,-Math.PI      , clearanceAngle, false, outerDiameter + clearance, outerDiameter, clearance);
 					break;
 				case 'X':
-					var clearanceAngle = clearance / ((clearance / 2 + outerDiameter) / 2) / 2;
+					var clearanceAngle = clearance / ((clearance / 2 + outerDiameter) / 2) * Thermal.space;
 					if(!this.pointBuffer) this._createCache(gl, x, y, Math.PI * 0.25, clearanceAngle, ((clearance / 2) + outerDiameter) / 2);
 					this._clearPoints(gl, shaderProgram, clearance);
 					Thermal._clearArc(gl, shaderProgram, pointBuffer, Math.PI * 0.25, clearanceAngle, false, outerDiameter + clearance, outerDiameter, clearance);
