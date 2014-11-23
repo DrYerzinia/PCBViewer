@@ -86,6 +86,19 @@ define(function() {
 		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, this.clearBuffer.itemSize, gl.FLOAT, false, 0, 0);
 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.clearBuffer.numItems);
 
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.clear2Buffer);
+		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, this.clear2Buffer.itemSize, gl.FLOAT, false, 0, 0);
+		gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.clear2Buffer.numItems);
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, this.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
+		gl.uniform1f(shaderProgram.roundPointsUniform, true);
+		gl.uniform1f(shaderProgram.innerRadiusUniform, 0.0);
+		gl.uniform1f(shaderProgram.pointsizeUniform, this.clearance * gl.scaleFactor);
+		gl.drawArrays(gl.POINTS, 0, this.vertexBuffer.numItems);
+
+		gl.uniform1f(shaderProgram.roundPointsUniform, false);
+
 	};
 
 	Pad.prototype.cleanupGL = function(gl){
@@ -99,16 +112,25 @@ define(function() {
 
 	}
 
-	Pad.prototype.generatePadBuffer = function(gl, thick){
+	Pad.prototype.generatePadBuffer = function(gl, thick, extra, side){
 
-		var vBuffer, vertices, x1, x2, y1, y2;
+		var vBuffer, vertices, x1, x2, y1, y2, t;
 
 		vBuffer = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
 
+		if(extra && !side){
+			t = thick;
+			thick += extra;
+		}
 		x1 = this.parent.mx + this.x1 - (thick / 2);
-		y1 = this.parent.my + this.y1 - (thick / 2);
 		x2 = x1 + this.x2 - this.x1 + thick;
+		if(extra && side){
+			thick += extra;
+		} else if(extra && !side){
+			thick = t;
+		}
+		y1 = this.parent.my + this.y1 - (thick / 2);
 		y2 = y1 + this.y2 - this.y1 + thick;
 
 		vertices = [
@@ -130,7 +152,8 @@ define(function() {
 	Pad.prototype.setupGL = function(gl){
 
 		this.vertexBuffer = this.generatePadBuffer(gl, this.thick);
-		this.clearBuffer = this.generatePadBuffer(gl, this.thick + this.clearance);
+		this.clearBuffer = this.generatePadBuffer(gl, this.thick, this.clearance, false);
+		this.clear2Buffer = this.generatePadBuffer(gl, this.thick, this.clearance, true);
 
 	};
 
