@@ -88,7 +88,7 @@ define(
 					break;
 				case 't':
 					var radius = ((clearance / 2) + outerDiameter) / 2;
-					var clearanceAngle = clearance / radius / 2;
+					var clearanceAngle = clearance / radius * Thermal.space;
 
 					ctx.lineCap = 'round';
 					ctx.lineWidth = clearance / 2;
@@ -107,7 +107,7 @@ define(
 					break;
 				case 'X':
 					var radius = ((clearance / 2) + outerDiameter) / 2;
-					var clearanceAngle = clearance / radius / 2;
+					var clearanceAngle = clearance / radius * Thermal.space;
 
 					ctx.lineCap = 'round';
 					ctx.lineWidth = clearance / 2;
@@ -126,8 +126,8 @@ define(
 					break;
 				case '+':
 					var radius = (clearance + outerDiameter) / 2;
-					var clearanceAngle = clearance / radius / 4;
-					var clearanceAngle2 = clearance / outerDiameter / 2;
+					var clearanceAngle = clearance / radius * Thermal.space / 2;
+					var clearanceAngle2 = clearance / outerDiameter * Thermal.space;
 					ctx.beginPath();
 					ctx.arc(x, y, radius, - clearanceAngle, -Math.PI * 0.5 + clearanceAngle, true);
 					ctx.arc(x, y, outerDiameter / 2, -Math.PI * 0.5 + clearanceAngle2, - clearanceAngle2, false);
@@ -151,8 +151,8 @@ define(
 					break;
 				case 'O':
 					var radius = (clearance + outerDiameter) / 2;
-					var clearanceAngle = clearance / radius / 4;
-					var clearanceAngle2 = clearance / outerDiameter / 2;
+					var clearanceAngle = clearance / radius * Thermal.space / 2;
+					var clearanceAngle2 = clearance / outerDiameter * Thermal.space;
 					ctx.beginPath();
 					ctx.arc(x, y, radius, -Math.PI * 0.25 - clearanceAngle, -Math.PI * 0.75 + clearanceAngle, true);
 					ctx.arc(x, y, outerDiameter / 2, -Math.PI * 0.75 + clearanceAngle2, -Math.PI * 0.25 - clearanceAngle2, false);
