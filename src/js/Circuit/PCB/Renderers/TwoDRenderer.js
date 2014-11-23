@@ -86,7 +86,7 @@ define(
 			this.ctx.drawImage(this.bufferCanvas, 0, 0);
 
 			// Draw Layers
-			this.ctx.globalAlpha = 0.5;
+			this.ctx.globalAlpha = 0.85;
 			if(side != Layer.TOP){
 
 	        	this._renderLayer(this.topSilk, '#FFFFFF', true);

@@ -173,7 +173,7 @@ define(
 			gl.uniform1f(shaderProgram.roundPointsUniform, false);
 		};
 
-		Pin.prototype.setupGL = function(gl, x, y){
+		Pin.prototype.setupGL = function(gl){
 	
 			var vBuffer;
 			vBuffer = gl.createBuffer();

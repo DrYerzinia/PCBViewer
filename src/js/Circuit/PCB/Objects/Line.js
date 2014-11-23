@@ -61,7 +61,7 @@ define(
 
 		};
 
-		Line.prototype.setupGL = function(gl, x, y){
+		Line.prototype.setupGL = function(gl){
 
 			var vBuffer, ox1, oy1, ox2, oy2;
 

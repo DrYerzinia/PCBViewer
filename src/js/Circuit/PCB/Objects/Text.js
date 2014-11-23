@@ -34,7 +34,7 @@ define(
 		};
 	
 		Text.prototype.render = function(ctx, color){
-	
+
 			var sym;
 	
 			ctx.save();
@@ -85,11 +85,9 @@ define(
 		}
 
 		Text.prototype.clearGL = function(gl, shaderProgram){};
-	
 		Text.prototype.cleanupGL = function(gl){};
+		Text.prototype.setupGL = function(gl){};
 
-		Text.prototype.setupGL = function(gl, x, y){};
-		
 		return Text;
 
 	}

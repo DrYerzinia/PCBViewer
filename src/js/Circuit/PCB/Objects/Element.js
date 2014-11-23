@@ -147,7 +147,7 @@ define(
 
 		};
 
-		Element.prototype.setupGL = function(gl, x, y){};
+		Element.prototype.setupGL = function(gl){};
 	
 		return Element;
 

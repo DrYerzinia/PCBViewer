@@ -121,7 +121,7 @@ define(
 
 		};
 
-		Polygon.prototype.setupGL = function(gl, x, y){
+		Polygon.prototype.setupGL = function(gl){
 
 			var vBuffer, vertices = [], i;
 

@@ -8,7 +8,16 @@ define(
 	
 		// ElementArc [x y r1 r2 startangle sweepangle thickness]
 		var ElementArc = function(x, y, r1, r2, start, sweep, thick) {
-	
+
+			if(sweep < 0){
+				start += sweep;
+				sweep = Math.abs(sweep);
+			}
+			if(start < 0) start += 360;
+
+			start = start / 180.0 * Math.PI;
+			sweep = sweep / 180.0 * Math.PI;
+
 			this.x = x;
 			this.y = y;
 			this.r1 = r1;
@@ -36,8 +45,8 @@ define(
 				this._cache.x,
 				this._cache.y,
 				this.r1,
-				(Math.PI * 2) - (Math.PI * this.start / 180.0),
-				(Math.PI * 2) - (Math.PI * (this.start + this.sweep) / 180.0),
+				(Math.PI * 2) - this.start,
+				(Math.PI * 2) - (this.start + this.sweep),
 				false
 			);
 			ctx.lineCap = 'round';
@@ -57,15 +66,15 @@ define(
 			outerRadius = this.r2 + this.r1 + this.thick;
 			innerRadius = this.r2 + this.r1 - this.thick;
 			radiusRatio = innerRadius / outerRadius / 2;
-	
+
 			gl.uniform1f(shaderProgram.roundPointsUniform, true);
 			gl.uniform1f(shaderProgram.arcEnabledUniform, true);
 			if(gl.side == Layer.SOLDER)
 				gl.uniform1f(shaderProgram.invertedUniform, true);
 			else
 				gl.uniform1f(shaderProgram.invertedUniform, false);
-			gl.uniform1f(shaderProgram.startAngleUniform, (this.start / 180.0 * Math.PI) - Math.PI);
-			gl.uniform1f(shaderProgram.sweepUniform, (this.sweep / 180.0 * Math.PI));
+			gl.uniform1f(shaderProgram.startAngleUniform, this.start - Math.PI);
+			gl.uniform1f(shaderProgram.sweepUniform, this.sweep);
 
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.pointBuffer);
 			gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, this.pointBuffer.itemSize, gl.FLOAT, false, 0, 0);
@@ -74,8 +83,8 @@ define(
 			gl.uniform1f(shaderProgram.innerRadiusUniform, radiusRatio);
 			gl.drawArrays(gl.POINTS, 0, this.pointBuffer.numItems);
 	
-			gl.uniform1f(shaderProgram.startAngleUniform, (this.start / 180.0 * Math.PI) - Math.PI);
-			gl.uniform1f(shaderProgram.sweepUniform, (this.sweep / 180.0 * Math.PI));
+			gl.uniform1f(shaderProgram.startAngleUniform, this.start - Math.PI);
+			gl.uniform1f(shaderProgram.sweepUniform, this.sweep);
 			gl.uniform1f(shaderProgram.arcEnabledUniform, false);
 			gl.uniform1f(shaderProgram.roundPointsUniform, false);
 	
@@ -94,12 +103,21 @@ define(
 
 		};
 
-		ElementArc.prototype.setupGL = function(gl, x, y){
-	
+		ElementArc.prototype.setupGL = function(gl){
+
+			var x, y;
+
+			x = this.x;
+			y = this.y;
+			if(this.parent){
+				x += this.parent.mx;
+				y += this.parent.my
+			}
+
 			var vBuffer;
 			vBuffer = gl.createBuffer();
 			gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([this.x + this.parent.mx, this.y + this.parent.my, 0.0]), gl.STATIC_DRAW);
+			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([x, y, 0.0]), gl.STATIC_DRAW);
 			vBuffer.itemSize = 3;
 			vBuffer.numItems = 1;
 			this.pointBuffer = vBuffer;

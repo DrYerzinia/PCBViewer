@@ -107,8 +107,8 @@ define(
 		};
 
 		// TODO: maybe make this layer named based!
-		PCBV._defaultLayerColors = ['#8B2323', '#3A5FCD', '#104E8B', '#CD3700',
-				'#548B54', '#8B7355', '#00868B', '#228B22',
+		PCBV._defaultLayerColors = ['#9B3333', '#3A5FCD', '#104E8B', '#CD3700',
+				'#548B54', '#9B8365', '#00868B', '#228B22',
 				'#000000', '#000000'];
 
 		PCBV.prototype._buildLayers = function(){
@@ -451,6 +451,15 @@ define(
 	
 							new_obj.parts.push(sub_obj);
 	
+						} else if(line.substr(0, 3) == 'Arc'){
+	
+							line = line.substr(4, line.length-2);
+							splt = line.split(' ');
+
+							sub_obj = new ElementArc(parseInt(splt[0]), parseInt(splt[1]), parseInt(splt[2]), parseInt(splt[3]), parseInt(splt[6]), parseInt(splt[7]), parseInt(splt[4]));
+
+							new_obj.parts.push(sub_obj);
+	
 						} else if(line.substr(0, 4) == 'Text'){
 	
 							line = line.substr(5, line.length-2);
@@ -514,9 +523,9 @@ define(
 	
 							line = line.substr(11, line.length-2);
 							splt = line.split(' ');
-	
-							sub_obj = new Line(parseInt(splt[0]), parseInt(splt[1]), parseInt(splt[2]), parseInt(splt[3]), parseInt(splt[4]), parseInt(splt[5]));
-	
+
+							sub_obj = new ElementLine(parseInt(splt[0]), parseInt(splt[1]), parseInt(splt[2]), parseInt(splt[3]), parseInt(splt[4]));
+
 							if(xmi == undefined) xmi = sub_obj.x1;					
 							else if(xmi > sub_obj.x1) xmi = sub_obj.x1;
 							if(xmi > sub_obj.x2) xmi = sub_obj.x2;

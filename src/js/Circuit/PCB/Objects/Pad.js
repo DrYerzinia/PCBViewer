@@ -127,7 +127,7 @@ define(function() {
 
 	};
 
-	Pad.prototype.setupGL = function(gl, x, y){
+	Pad.prototype.setupGL = function(gl){
 
 		this.vertexBuffer = this.generatePadBuffer(gl, this.thick);
 		this.clearBuffer = this.generatePadBuffer(gl, this.thick + this.clearance);
